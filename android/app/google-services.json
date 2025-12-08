@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "243368828308",
+    "project_id": "iamjosiah-2b6be",
+    "storage_bucket": "iamjosiah-2b6be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243368828308:android:00c26f3c0e7763a7c28381",
+        "android_client_info": {
+          "package_name": "com.iamjosiah.portafolio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu4xo9Kn6VOe1n9qpFhAlFIH_HJK_VVA0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
