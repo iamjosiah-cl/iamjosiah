@@ -318,7 +318,7 @@ final List<_Project> _sampleData = [
     imageUrl:
     'https://images.unsplash.com/photo-1503264116251-35a269479413?fit=crop&w=800&q=80',
     repoUrl: 'https://github.com/tuUsuario/hidratacion-platform',
-    demoUrl: 'https://hidratacion.app',
+    demoUrl: 'https://gotita-a234d.web.app/',
   ),
 ];
 

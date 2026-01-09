@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../firebase_options.dart'; // generado por FlutterFire CLI
+import 'text_editor_80mm.dart';
 
 const double kTicketWidthMm = 72.0;
 const int kCharsPerLine = 48;
@@ -206,6 +207,16 @@ class _ChecklistPageState extends State<ChecklistPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(_selectedTitle)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TextEditorPage()),
+          );
+        },
+        icon: const Icon(Icons.edit_note),
+        label: const Text('Editor 80mm'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

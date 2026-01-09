@@ -11,7 +11,6 @@ import 'package:portafolio/jugar/game_wrapper.dart';
 import 'package:portafolio/jugar/puzzle1/titulo.dart';
 import 'package:portafolio/jugar/puzzle2/titulo.dart';
 import 'package:portafolio/jugar/puzzle3/titulo.dart';
-import 'package:portafolio/jugar/space_miner/titulo.dart';
 
 class Beacon extends StatelessWidget {
   const Beacon({super.key});
@@ -120,17 +119,7 @@ class BeaconHome extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const GamesPage()),
                     ),
                   ),
-                  _linkCardWithIcon(
-                    Icons.rocket_launch,
-                    'Space Miner',
-                    'Juego incremental de minería espacial',
-                    '',
-                    const Color(0xFF00FFFF), // Cyan
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const GameWrapper(child: InicioSpaceMiner())),
-                    ),
-                  ),
+            
 
                   _sectionTitle('Mis Redes'),
                   _linkCardWithIcon(

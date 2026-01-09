@@ -8,7 +8,6 @@ import 'package:portafolio/jugar/game_wrapper.dart';
 import 'package:portafolio/jugar/puzzle1/titulo.dart';
 import 'package:portafolio/jugar/puzzle2/titulo.dart';
 import 'package:portafolio/jugar/puzzle3/titulo.dart';
-import 'package:portafolio/jugar/space_miner/titulo.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
