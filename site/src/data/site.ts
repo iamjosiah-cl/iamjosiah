@@ -45,7 +45,7 @@ export const socials: Social[] = [
   { label: 'Instagram', icon: 'instagram', url: 'https://www.instagram.com/iamjosiah.cl/' },
   { label: 'TikTok', icon: 'tiktok', url: 'https://www.tiktok.com/@jota_windu' },
   { label: 'YouTube', icon: 'youtube', url: 'https://www.youtube.com/@iamjosiah-cl' },
-  { label: 'GitHub', icon: 'github', url: 'https://github.com/iamjosiah' },
+  { label: 'GitHub', icon: 'github', url: 'https://github.com/iamjosiah-cl' },
   { label: 'Twitch', icon: 'twitch', url: 'https://www.twitch.tv/jotawindu' },
 ];
 
