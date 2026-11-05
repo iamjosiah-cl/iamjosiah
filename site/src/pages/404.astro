@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Base title="Página no encontrada | I Am Josiah" path="/404">
+  <main class="nf">
+    <p class="code gradient-text">404</p>
+    <h1>Esta página no existe</h1>
+    <p>Puede que el enlace esté roto o que la página se haya movido.</p>
+    <a class="btn btn-primary" href="/"><Icon name="arrow-left" size={18} /> Volver al inicio</a>
+  </main>
+</Base>
+
+<style>
+  .nf { min-height: 100dvh; display: grid; place-content: center; justify-items: center; gap: 16px; padding: 24px; text-align: center; }
+  .code { font-size: 6rem; font-weight: 800; line-height: 1; letter-spacing: -0.05em; }
+  h1 { font-size: 1.6rem; }
+  .nf > p:not(.code) { color: var(--text-muted); }
+</style>

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../jugar/interactive.dart';
-import 'package:portafolio/portafolio.dart';
+import 'package:portafolio/portfolio_web/portafolio.dart';
 import 'back.dart';
 import 'pinpad.dart';
 

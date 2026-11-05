@@ -1,0 +1,37 @@
+---
+import Icon from './Icon.astro';
+import { flutterAppUrl } from '../data/site';
+---
+
+<footer class="footer">
+  <div class="container inner">
+    <div>
+      <a href="/" class="brand"><span>I Am</span> Josiah</a>
+      <p>Ingeniero Civil en Informática apasionado por el desarrollo de software y la innovación tecnológica.</p>
+    </div>
+    <div class="right">
+      {flutterAppUrl && (
+        <a class="play" href={`${flutterAppUrl}/juegos`} target="_blank" rel="noopener noreferrer">
+          <Icon name="gamepad" size={16} /> ¿Aún quieres jugar? aquí estoy :)
+        </a>
+      )}
+      <p class="copy">
+        © {new Date().getFullYear()} Josías Jofré. Hecho con <Icon name="heart" size={14} class="heart" /> en Chile
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--border); background: rgb(11 18 32 / 0.8); padding-block: 36px; }
+  .inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+  .brand { font-size: 1.2rem; font-weight: 500; }
+  .brand span { color: var(--accent); font-weight: 800; }
+  .inner p { color: var(--text-muted); font-size: 0.92rem; margin-top: 8px; max-width: 46ch; }
+  .right { display: grid; gap: 8px; justify-items: start; align-content: start; }
+  @media (min-width: 700px) { .right { justify-items: end; } }
+  .play { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.92rem; }
+  .play:hover { color: var(--accent); }
+  .copy { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .copy :global(.heart) { color: #f87171; fill: #f87171; }
+</style>

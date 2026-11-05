@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portafolio/portafolio.dart';
+import 'package:portafolio/portfolio_web/portafolio.dart';
 import 'puzzle3.dart';
 
 class ColorGrid extends StatefulWidget {

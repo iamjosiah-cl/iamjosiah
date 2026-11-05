@@ -47,41 +47,35 @@
   <link rel="icon" href="favicon.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="canonical" href="https://iamjosiah.cl" />
+  <meta name="theme-color" content="#0B1220" />
   <style>
-    /* Estilos para el loader inicial */
+    html, body { margin: 0; background: #0B1220; }
+
+    /* Loader inicial: se quita apenas Flutter pinta su primer frame */
     .loading-container {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #ffffff;
-      /* O #0B132B para modo oscuro */
+      inset: 0;
+      background: #0B1220;
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      transition: opacity 0.5s ease-out;
+      transition: opacity 0.2s ease-out;
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #E3EDFF;
-      border-top: 5px solid #2166F0;
-      /* Color primario del portafolio */
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.08);
+      border-top-color: #22D3EE;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-      100% {
-        transform: rotate(360deg);
-      }
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation-duration: 2s; }
     }
   </style>
 </head>
@@ -93,21 +87,23 @@
   </div>
 
   <script>
-    // Opcional: Script para remover el loader si Flutter tarda mucho o para debugging
-    // Flutter se encarga de montar la app sobre el body.
-    window.addEventListener('load', function () {
-      // Fallback: Si Flutter no carga en 4 segundos, forzamos remover el loader
-      // Esto ayuda si hay un error silencioso o si la carga es muy lenta.
-      setTimeout(function () {
+    (function () {
+      var removed = false;
+      function hideLoader() {
+        if (removed) return;
+        removed = true;
         var loading = document.getElementById('loading');
-        if (loading) {
-          loading.style.opacity = '0'; // Desvanecer
-          setTimeout(function () {
-            if (loading.parentNode) loading.parentNode.removeChild(loading);
-          }, 500);
-        }
-      }, 4000); // 3 segundos de espera máxima
-    });
+        if (!loading) return;
+        loading.style.opacity = '0';
+        setTimeout(function () {
+          if (loading.parentNode) loading.parentNode.removeChild(loading);
+        }, 200);
+      }
+      // Flutter emite este evento al pintar el primer frame.
+      window.addEventListener('flutter-first-frame', hideLoader);
+      // Respaldo por si el evento no llega (error silencioso).
+      setTimeout(hideLoader, 8000);
+    })();
   </script>
   <!-- Bootstrap de Flutter Web -->
   <script src="flutter_bootstrap.js" async></script>

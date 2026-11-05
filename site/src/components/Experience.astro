@@ -1,0 +1,176 @@
+---
+import Icon from './Icon.astro';
+import { experience } from '../data/cv';
+---
+
+<section id="experiencia" class="section container">
+  <div class="section-head reveal">
+    <h2>Experiencia Laboral</h2>
+    <div class="accent-bar"></div>
+    <p>Mi trayectoria profesional y proyectos en los que he participado.</p>
+  </div>
+
+  <div class="layout reveal">
+    <div class="list" role="tablist" aria-label="Experiencias" aria-orientation="vertical">
+      {experience.map((e, i) => (
+        <button
+          role="tab"
+          id={`exp-tab-${i}`}
+          aria-controls={`exp-panel-${i}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+        >
+          <strong>{e.title}</strong>
+          <span>{e.org}</span>
+        </button>
+      ))}
+    </div>
+
+    <div class="detail card">
+      {experience.map((e, i) => (
+        <article id={`exp-panel-${i}`} role="tabpanel" aria-labelledby={`exp-tab-${i}`} hidden={i !== 0}>
+          <header>
+            <span class="icon-box"><Icon name="briefcase" size={22} /></span>
+            <div>
+              <h3>{e.title}</h3>
+              <p class="org">{e.org}</p>
+            </div>
+            <span class="period">{e.period}</span>
+          </header>
+          <ul class="bullets">
+            {e.bullets.map((b) => <li>{b}</li>)}
+          </ul>
+          <p class="tech-label">Tecnologías utilizadas</p>
+          <div class="chips">
+            {e.tech.map((t) => <span class="chip">{t}</span>)}
+          </div>
+        </article>
+      ))}
+
+      <div class="arrows">
+        <button type="button" data-step="-1" aria-label="Experiencia anterior"><Icon name="arrow-left" size={18} /></button>
+        <span class="counter" aria-live="polite"><span data-current>1</span> / {experience.length}</span>
+        <button type="button" data-step="1" aria-label="Siguiente experiencia"><Icon name="arrow-right" size={18} /></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('experiencia')!;
+  const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+  const counter = root.querySelector<HTMLElement>('[data-current]')!;
+  let current = 0;
+
+  const select = (i: number, focus = false) => {
+    current = (i + tabs.length) % tabs.length;
+    tabs.forEach((t, j) => {
+      const on = j === current;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+    });
+    counter.textContent = String(current + 1);
+    const tab = tabs[current];
+    // En móvil la lista es horizontal: centra la tarjeta activa.
+    tab.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    if (focus) tab.focus();
+  };
+
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(i));
+    t.addEventListener('keydown', (e) => {
+      const keys: Record<string, number> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+      if (e.key in keys) {
+        e.preventDefault();
+        select(i + keys[e.key], true);
+      }
+    });
+  });
+  root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+    b.addEventListener('click', () => select(current + Number(b.dataset.step))),
+  );
+</script>
+
+<style>
+  .layout { display: grid; gap: 24px; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 340px 1fr; align-items: start; } }
+
+  .list {
+    display: flex; gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+  @media (min-width: 900px) {
+    .list { flex-direction: column; overflow: visible; padding: 0; }
+  }
+  .list button {
+    flex: 0 0 240px;
+    scroll-snap-align: center;
+    display: grid; gap: 2px;
+    text-align: left;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgb(255 255 255 / 0.03);
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  @media (min-width: 900px) { .list button { flex: none; } }
+  .list button:hover { border-color: var(--border-strong); background: rgb(255 255 255 / 0.05); }
+  .list button strong { font-weight: 600; font-size: 0.95rem; }
+  .list button span { color: var(--text-muted); font-size: 0.85rem; }
+  .list button[aria-selected='true'] {
+    border-color: var(--border-accent);
+    background: rgb(34 211 238 / 0.1);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .list button[aria-selected='true'] strong { color: var(--accent); }
+
+  .detail { padding: 28px; display: grid; gap: 20px; }
+  @media (max-width: 600px) { .detail { padding: 20px; } }
+  article { display: grid; gap: 20px; animation: fade 0.25s var(--ease); }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } }
+
+  header { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  header > div { flex: 1; min-width: 180px; }
+  h3 { font-size: 1.3rem; font-weight: 700; }
+  .org { color: var(--text-muted); }
+  .period {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--accent);
+    padding: 5px 12px; border-radius: 999px;
+    background: rgb(34 211 238 / 0.08);
+    white-space: nowrap;
+  }
+
+  .bullets { display: grid; gap: 12px; }
+  .bullets li {
+    position: relative; padding-left: 22px;
+    color: var(--text-muted); line-height: 1.7;
+  }
+  .bullets li::before {
+    content: ''; position: absolute; left: 4px; top: 0.7em;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--grad);
+  }
+  .tech-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -8px; }
+
+  .arrows {
+    display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+  .arrows button {
+    display: grid; place-items: center;
+    width: 40px; height: 40px;
+    border-radius: 12px; border: 1px solid var(--border);
+    background: transparent; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .arrows button:hover { border-color: var(--border-accent); color: var(--accent); }
+  .counter { color: var(--text-muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+</style>

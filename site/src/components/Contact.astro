@@ -1,0 +1,209 @@
+---
+import Icon from './Icon.astro';
+import { profile, contactSocials } from '../data/site';
+---
+
+<section id="contacto" class="section container">
+  <div class="section-head reveal">
+    <h2>Contacto</h2>
+    <div class="accent-bar"></div>
+    <p>¿Tienes alguna pregunta o propuesta? ¡No dudes en contactarme!</p>
+  </div>
+
+  <div class="grid">
+    <form class="card form reveal" id="contact-form" novalidate>
+      <h3>Envíame un mensaje</h3>
+
+      <label>
+        <span>Nombre</span>
+        <input name="name" type="text" autocomplete="name" placeholder="Tu nombre" required maxlength="120" />
+        <small class="err" data-for="name">Ingresa tu nombre</small>
+      </label>
+
+      <label>
+        <span>Correo electrónico</span>
+        <input name="email" type="email" autocomplete="email" placeholder="Tu correo electrónico" required maxlength="200" />
+        <small class="err" data-for="email">Correo no válido</small>
+      </label>
+
+      <label>
+        <span>Mensaje</span>
+        <textarea name="message" rows="5" placeholder="Tu mensaje" required maxlength="5000"></textarea>
+        <small class="err" data-for="message">Escribe tu mensaje</small>
+      </label>
+
+      <!-- Campo trampa para bots: los humanos no lo ven -->
+      <input class="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <button class="btn btn-primary" type="submit">
+        <Icon name="send" size={18} /> <span data-label>Enviar mensaje</span>
+      </button>
+      <p class="status" role="status" aria-live="polite"></p>
+    </form>
+
+    <aside class="card info reveal" style="--d:60ms">
+      <h3>Información de contacto</h3>
+      <ul class="rows">
+        <li>
+          <span class="icon-box"><Icon name="mail" size={20} /></span>
+          <div>
+            <strong>Email</strong>
+            {profile.emails.map((e) => <a href={`mailto:${e}`}>{e}</a>)}
+          </div>
+        </li>
+        <li>
+          <span class="icon-box"><Icon name="phone" size={20} /></span>
+          <div>
+            <strong>Teléfono</strong>
+            <a href={`tel:${profile.phone.replace(/\s/g, '')}`}>{profile.phone}</a>
+          </div>
+        </li>
+        <li>
+          <span class="icon-box"><Icon name="map-pin" size={20} /></span>
+          <div>
+            <strong>Ubicación</strong>
+            <span>{profile.location}</span>
+          </div>
+        </li>
+      </ul>
+
+      <h3 class="social-title">Redes Sociales</h3>
+      <ul class="socials">
+        {contactSocials.map((s) => (
+          <li>
+            <a href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label} title={s.label}>
+              <Icon name={s.icon} size={20} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import { sendContactMessage } from '../scripts/contact';
+
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const label = btn.querySelector<HTMLElement>('[data-label]')!;
+  const status = form.querySelector<HTMLElement>('.status')!;
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const fields = ['name', 'email', 'message'] as const;
+  const input = (n: string) => form.elements.namedItem(n) as HTMLInputElement | HTMLTextAreaElement;
+
+  const validate = () => {
+    let ok = true;
+    for (const n of fields) {
+      const v = input(n).value.trim();
+      const valid = n === 'email' ? emailRx.test(v) : v.length > 0;
+      const err = form.querySelector<HTMLElement>(`.err[data-for="${n}"]`)!;
+      if (n === 'email') err.textContent = v ? 'Correo no válido' : 'Ingresa tu correo';
+      input(n).toggleAttribute('aria-invalid', !valid);
+      err.classList.toggle('show', !valid);
+      ok &&= valid;
+    }
+    return ok;
+  };
+
+  for (const n of fields) {
+    input(n).addEventListener('input', () => {
+      if (input(n).hasAttribute('aria-invalid')) validate();
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.className = 'status';
+    status.textContent = '';
+    if (!validate()) {
+      form.querySelector<HTMLElement>('[aria-invalid]')?.focus();
+      return;
+    }
+    // Bot detectado: fingimos éxito sin enviar nada.
+    if (input('website').value) {
+      form.reset();
+      status.textContent = 'Mensaje enviado. ¡Gracias!';
+      status.classList.add('ok');
+      return;
+    }
+
+    btn.disabled = true;
+    label.textContent = 'Enviando…';
+    try {
+      await sendContactMessage({
+        name: input('name').value.trim(),
+        email: input('email').value.trim(),
+        message: input('message').value.trim(),
+      });
+      form.reset();
+      status.textContent = 'Mensaje enviado. ¡Gracias!';
+      status.classList.add('ok');
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'No se pudo enviar el mensaje. Intenta de nuevo o escríbeme por correo.';
+      status.classList.add('fail');
+    } finally {
+      btn.disabled = false;
+      label.textContent = 'Enviar mensaje';
+    }
+  });
+</script>
+
+<style>
+  .grid { display: grid; gap: 24px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1.3fr 1fr; align-items: start; } }
+
+  .form, .info { padding: 28px; display: grid; gap: 18px; }
+  @media (max-width: 600px) { .form, .info { padding: 20px; } }
+  h3 { font-size: 1.2rem; font-weight: 700; }
+
+  label { display: grid; gap: 8px; }
+  label > span { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    background: rgb(255 255 255 / 0.04);
+    color: var(--text);
+    font: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+  }
+  textarea { resize: vertical; min-height: 130px; }
+  input::placeholder, textarea::placeholder { color: var(--text-dim); }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgb(255 255 255 / 0.06);
+    box-shadow: 0 0 0 3px rgb(34 211 238 / 0.18);
+  }
+  [aria-invalid] { border-color: #f87171; }
+  .err { display: none; color: #fca5a5; font-size: 0.82rem; }
+  .err:global(.show) { display: block; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+  .form .btn { justify-self: start; }
+  .status { font-size: 0.92rem; min-height: 1.4em; }
+  .status:global(.ok) { color: #6ee7b7; }
+  .status:global(.fail) { color: #fca5a5; }
+
+  .rows { display: grid; gap: 18px; }
+  .rows li { display: flex; gap: 14px; align-items: flex-start; }
+  .rows div { display: grid; gap: 2px; min-width: 0; }
+  .rows strong { font-weight: 600; }
+  .rows a, .rows span { color: var(--text-muted); overflow-wrap: anywhere; }
+  .rows a:hover { color: var(--accent); }
+
+  .social-title { margin-top: 8px; }
+  .socials { display: flex; gap: 10px; }
+  .socials a {
+    display: grid; place-items: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  .socials a:hover { color: var(--accent); border-color: var(--border-accent); background: rgb(34 211 238 / 0.08); }
+</style>

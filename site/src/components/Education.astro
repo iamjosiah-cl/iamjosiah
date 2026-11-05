@@ -1,0 +1,86 @@
+---
+import Icon from './Icon.astro';
+import { education } from '../data/cv';
+const { degree, extras, achievements } = education;
+---
+
+<section id="educacion" class="section container">
+  <div class="section-head reveal">
+    <h2>Educación y Logros</h2>
+    <div class="accent-bar"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card col reveal">
+      <h3 class="col-title"><Icon name="graduation" size={20} /> Formación Académica</h3>
+
+      <div class="degree">
+        <strong>{degree.title}</strong>
+        <span class="org">{degree.org}</span>
+        <span class="period">{degree.period}</span>
+        <p>{degree.text}</p>
+      </div>
+
+      <div>
+        <p class="sub">Conocimientos Adicionales</p>
+        <ul class="extras">
+          {extras.map((x) => <li><Icon name="check" size={16} /> {x}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card col reveal" style="--d:60ms">
+      <h3 class="col-title"><Icon name="trophy" size={20} /> Logros y Reconocimientos</h3>
+      <ol class="timeline">
+        {achievements.map((a) => (
+          <li>
+            <strong>{a.title}</strong>
+            <p>{a.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .grid { display: grid; gap: 24px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .col { padding: 28px; display: grid; gap: 24px; align-content: start; }
+  @media (max-width: 600px) { .col { padding: 20px; } }
+  .col-title { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; font-weight: 700; color: var(--accent); }
+
+  .degree {
+    display: grid; gap: 4px;
+    padding: 18px;
+    border-radius: 14px;
+    background: rgb(255 255 255 / 0.03);
+    border: 1px solid var(--border);
+  }
+  .degree strong { font-size: 1.08rem; }
+  .org { color: var(--text-muted); }
+  .period { color: var(--accent); font-size: 0.86rem; font-weight: 600; }
+  .degree p { color: var(--text-muted); font-size: 0.94rem; margin-top: 8px; line-height: 1.6; }
+
+  .sub { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+  .extras { display: grid; gap: 10px; }
+  .extras li { display: flex; gap: 10px; align-items: center; color: var(--text-muted); }
+  .extras :global(svg) { color: var(--accent); flex-shrink: 0; }
+
+  .timeline { margin: 0; padding: 0; list-style: none; display: grid; gap: 22px; }
+  .timeline li {
+    position: relative;
+    padding-left: 24px;
+    border-left: 1px solid var(--border-strong);
+    padding-bottom: 2px;
+  }
+  .timeline li::before {
+    content: ''; position: absolute; left: -6px; top: 6px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--bg-elev);
+    border: 2px solid var(--accent);
+  }
+  .timeline strong { display: block; font-weight: 600; }
+  .timeline p { color: var(--text-muted); font-size: 0.93rem; margin-top: 4px; line-height: 1.6; }
+</style>

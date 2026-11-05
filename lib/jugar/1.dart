@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:portafolio/jugar/2.dart';
-import 'package:portafolio/portafolio.dart';
+import 'package:portafolio/portfolio_web/portafolio.dart';
 
 class PuzzlePage extends StatefulWidget {
   const PuzzlePage({super.key});

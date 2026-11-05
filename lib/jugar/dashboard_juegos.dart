@@ -2,7 +2,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:portafolio/portafolio.dart'; // Para volver al inicio si es necesario
+import 'package:portafolio/portfolio_web/portafolio.dart'; // Para volver al inicio si es necesario
 import 'package:portafolio/jugar/game_wrapper.dart';
 // Importamos los juegos existentes
 import 'package:portafolio/jugar/puzzle1/titulo.dart';
@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 
 import 'package:flutter/services.dart';
+import 'package:portafolio/styles/beacon_style.dart';
+import 'package:portafolio/widgets/animations.dart';
 
 class GamesPage extends StatefulWidget {
   const GamesPage({super.key});
@@ -68,41 +70,50 @@ class _GamesPageState extends State<GamesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true, // Para que el fondo cubra todo
+      backgroundColor: BeaconStyle.backgroundColor,
       appBar: _buildAppBar(context),
-      body: FutureBuilder<List<bool>>(
-        future: _cargarEstadosDeJuegos(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
-            );
-          }
-          return _buildContenidoJuegos(snapshot.data!);
-        },
+      body: Stack( // Stack para el fondo animado
+        children: [
+           const Positioned.fill(child: AnimatedBackgroundOrbs()),
+           SafeArea( // SafeArea para evitar solapamiento con AppBar si no es transparente total
+             child: FutureBuilder<List<bool>>(
+              future: _cargarEstadosDeJuegos(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.cyanAccent),
+                  );
+                }
+                return _buildContenidoJuegos(snapshot.data!);
+              },
+            ),
+           ),
+        ],
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.orange.shade100,
-      automaticallyImplyLeading: false, // Usaremos nuestro propio botón de volver
-      elevation: 2,
+      backgroundColor: Colors.transparent, // Transparente sobre el fondo animado
+      elevation: 0,
+      iconTheme: const IconThemeData(color: Colors.white), // Iconos blancos
+      automaticallyImplyLeading: false, 
       title: Text(
         _displayName,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.cyanAccent), // Color marca
         overflow: TextOverflow.ellipsis,
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.home, size: 26),
+          icon: const Icon(Icons.home, size: 26, color: Colors.white),
           tooltip: 'Volver al inicio',
           onPressed: _goToHome,
         ),
         // Menu simplificado para portafolio
         if (MediaQuery.of(context).size.width > 800) ...[
           _buildTextButton(context, 'Juegos', const GamesPage()),
-          // _buildTextButton(context, 'Contacto', ContactSection()), // Requiere instanciación o navegación
         ],
         const SizedBox(width: 20),
       ],
@@ -129,16 +140,24 @@ class _GamesPageState extends State<GamesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   _buildHeroSection(),
+                   FadeInAnimation(
+                     animateInView: true,
+                     delay: const Duration(milliseconds: 200),
+                     child: _buildHeroSection(),
+                   ),
                   const SizedBox(height: 40),
 
-                  _buildSectionWithGames(
-                    'Puzzles Disponibles 🧩',
-                    'Desafía tu mente con estos juegos',
-                    juegos,
-                    estadosRecortados,
-                    screenWidth,
-                    Colors.purple.shade50,
+                  FadeInAnimation(
+                    animateInView: true,
+                    delay: const Duration(milliseconds: 400),
+                    child: _buildSectionWithGames(
+                      'Puzzles Disponibles 🧩',
+                      'Desafía tu mente con estos juegos',
+                      juegos,
+                      estadosRecortados,
+                      screenWidth,
+                      Colors.transparent,
+                    ),
                   ),
                 ],
               ),
@@ -154,33 +173,30 @@ class _GamesPageState extends State<GamesPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.orange.shade100, Colors.orange.shade50],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: BeaconStyle.cardBgGlass,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        border: Border.all(color: BeaconStyle.cardBorder),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.1),
+            color: Colors.black26,
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: [
-          const Icon(Icons.games, size: 64, color: Colors.orange),
+          const Icon(Icons.games, size: 64, color: Colors.cyanAccent),
           const SizedBox(height: 16),
           const Text(
             '¡Bienvenido a la Zona de Juegos!',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: BeaconStyle.textPrimary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Todos los juegos están desbloqueados para ti',
-            style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+            style: TextStyle(fontSize: 18, color: BeaconStyle.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -217,16 +233,16 @@ class _GamesPageState extends State<GamesPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: BeaconStyle.cardBgGlass, // Glass background for section
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: BeaconStyle.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titulo, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          Text(titulo, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: BeaconStyle.textPrimary)),
           const SizedBox(height: 8),
-          Text(descripcion, style: TextStyle(fontSize: 16, color: Colors.grey.shade700)),
+          Text(descripcion, style: const TextStyle(fontSize: 16, color: BeaconStyle.textSecondary)),
           const SizedBox(height: 24),
           GridView.builder(
             shrinkWrap: true,
@@ -239,10 +255,14 @@ class _GamesPageState extends State<GamesPage> {
               mainAxisSpacing: 16,
             ),
             itemBuilder: (context, index) {
-              return _buildGameCard(
-                context,
-                juegos[index],
-                estados[index],
+              return FadeInAnimation(
+                animateInView: true,
+                delay: Duration(milliseconds: 600 + (index * 100)),
+                child: _buildGameCard(
+                  context,
+                  juegos[index],
+                  estados[index],
+                ),
               );
             },
           ),
@@ -260,9 +280,10 @@ class _GamesPageState extends State<GamesPage> {
     // pero aquí usamos InkWell simple
     return Card(
       elevation: 4,
+      color: BeaconStyle.cardBg.withOpacity(0.5), // Dark transparent card
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.orange.shade200, width: 2),
+        side: const BorderSide(color: BeaconStyle.cardBorder, width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -276,7 +297,7 @@ class _GamesPageState extends State<GamesPage> {
               flex: 3,
               child: Container(
                 decoration: BoxDecoration(
-                  color: (gameData['color'] as Color? ?? Colors.grey).withOpacity(0.2),
+                  color: (gameData['color'] as Color? ?? Colors.grey).withOpacity(0.1), // More subtle background
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                 ),
                 child: Center(
@@ -295,7 +316,7 @@ class _GamesPageState extends State<GamesPage> {
                 child: Center(
                   child: Text(
                     gameData['title'] as String,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: BeaconStyle.textPrimary),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -317,7 +338,7 @@ class _GamesPageState extends State<GamesPage> {
   TextButton _buildTextButton(BuildContext context, String label, Widget page) {
     return TextButton(
       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
-      child: Text(label, style: const TextStyle(color: Colors.black87)),
+      child: Text(label, style: const TextStyle(color: Colors.cyanAccent)),
     );
   }
 }

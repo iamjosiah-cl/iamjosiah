@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+  delay?: number;
+}
+const { project: p, delay = 0 } = Astro.props;
+const href = `/proyectos/${p.slug}/`;
+---
+
+<article class="card card-hover project reveal" style={`--d:${delay}ms`}>
+  <a href={href} class="thumb" tabindex="-1" aria-hidden="true">
+    {typeof p.image === 'string' ? (
+      <img src={p.image} alt="" loading="lazy" decoding="async" width="640" height="360" />
+    ) : (
+      <Image src={p.image} alt="" width={640} height={360} densities={[1, 2]} loading="lazy" />
+    )}
+  </a>
+  <div class="body">
+    <h3><a href={href} class="stretched">{p.title}</a></h3>
+    <p>{p.description}</p>
+    <div class="chips">
+      {p.tags.slice(0, 4).map((t) => <span class="chip">{t}</span>)}
+    </div>
+    <span class="more">Ver detalles <Icon name="arrow-right" size={16} /></span>
+  </div>
+</article>
+
+<style>
+  .project { position: relative; overflow: hidden; display: flex; flex-direction: column; }
+  .thumb { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bg-elev); }
+  .thumb :global(img) {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.35s var(--ease);
+  }
+  .project:hover .thumb :global(img) { transform: scale(1.04); }
+
+  .body { padding: 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  h3 { font-size: 1.15rem; font-weight: 700; }
+  .stretched::after { content: ''; position: absolute; inset: 0; }
+  .stretched:focus-visible { outline: none; }
+  .project:has(.stretched:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .body p {
+    color: var(--text-muted); font-size: 0.93rem; line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips .chip { font-size: 0.75rem; padding: 3px 10px; }
+  .more {
+    margin-top: auto; padding-top: 4px;
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--accent); font-weight: 600; font-size: 0.9rem;
+  }
+  .more :global(svg) { transition: transform 0.15s var(--ease); }
+  .project:hover .more :global(svg) { transform: translateX(3px); }
+</style>

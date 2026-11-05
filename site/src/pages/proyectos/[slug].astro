@@ -1,0 +1,112 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import Footer from '../../components/Footer.astro';
+import { projects, type Project } from '../../data/projects';
+import { flutterAppUrl } from '../../data/site';
+
+export const getStaticPaths = (() =>
+  projects.map((project) => ({ params: { slug: project.slug }, props: { project } }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+}
+const { project: p } = Astro.props;
+const appUrl = p.flutterPath && flutterAppUrl ? `${flutterAppUrl}${p.flutterPath}` : null;
+const others = projects.filter((x) => x.slug !== p.slug);
+---
+
+<Base title={`${p.title} | Proyectos de Josías Jofré`} description={p.description}>
+  <header class="bar">
+    <div class="container bar-inner">
+      <a href="/proyectos/" class="back"><Icon name="arrow-left" size={18} /> Todos los proyectos</a>
+    </div>
+  </header>
+
+  <main class="container page">
+    <div class="cover reveal">
+      {typeof p.image === 'string' ? (
+        <img src={p.image} alt={`Vista previa de ${p.title}`} width="1280" height="720" fetchpriority="high" />
+      ) : (
+        <Image src={p.image} alt={`Vista previa de ${p.title}`} width={1280} height={720} loading="eager" fetchpriority="high" />
+      )}
+    </div>
+
+    <div class="layout">
+      <article class="content">
+        <h1>{p.title}</h1>
+        <div class="chips">{p.tags.map((t) => <span class="chip">{t}</span>)}</div>
+
+        <section class="card block">
+          <h2>Sobre el proyecto</h2>
+          <p>{p.description}</p>
+        </section>
+
+        {p.longDescription && (
+          <section class="card block">
+            <h2>Detalles técnicos</h2>
+            <p class="pre">{p.longDescription}</p>
+          </section>
+        )}
+      </article>
+
+      {(appUrl || p.demoUrl) && (
+        <aside class="card block actions">
+          <h2>Acciones</h2>
+          {appUrl && (
+            <a class="btn btn-primary" href={appUrl} target="_blank" rel="noopener noreferrer">
+              <Icon name="external" size={18} /> Probar aplicación
+            </a>
+          )}
+          {p.demoUrl && (
+            <a class={`btn ${appUrl ? 'btn-tonal' : 'btn-primary'}`} href={p.demoUrl} target="_blank" rel="noopener noreferrer">
+              <Icon name="globe" size={18} /> Ver demo online
+            </a>
+          )}
+        </aside>
+      )}
+    </div>
+
+    <nav class="others" aria-label="Otros proyectos">
+      <h2>Otros proyectos</h2>
+      <ul>
+        {others.map((o) => (
+          <li><a href={`/proyectos/${o.slug}/`} class="card card-hover">{o.title} <Icon name="arrow-right" size={16} /></a></li>
+        ))}
+      </ul>
+    </nav>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .bar { position: sticky; top: 0; z-index: 50; background: rgb(11 18 32 / 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .bar-inner { height: var(--nav-h); display: flex; align-items: center; }
+  .back { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 500; }
+  .back:hover { color: var(--accent); }
+
+  .page { padding-block: 32px 80px; }
+  .cover { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); aspect-ratio: 16 / 7; background: var(--bg-elev); }
+  .cover :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .layout { display: grid; gap: 24px; margin-top: 32px; }
+  @media (min-width: 900px) { .layout { grid-template-columns: 1fr 300px; align-items: start; } }
+  .content { display: grid; gap: 20px; }
+  h1 { font-size: clamp(2rem, 1.4rem + 3vw, 3rem); font-weight: 800; letter-spacing: -0.03em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .block { padding: 24px; display: grid; gap: 12px; }
+  .block h2 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+  .block p { color: var(--text-muted); line-height: 1.75; }
+  .pre { white-space: pre-line; }
+  .actions { position: sticky; top: calc(var(--nav-h) + 16px); }
+  .actions .btn { width: 100%; }
+
+  .others { margin-top: 56px; }
+  .others h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+  .others ul { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .others a { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; font-weight: 600; }
+  .others a :global(svg) { color: var(--accent); }
+</style>

@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import Projects from '../../components/Projects.astro';
+import Footer from '../../components/Footer.astro';
+---
+
+<Base
+  title="Mis Proyectos | Josías Jofré"
+  description="Proyectos de Josías Jofré: apps con Flutter y Firebase, herramientas web y más."
+>
+  <header class="bar">
+    <div class="container bar-inner">
+      <a href="/" class="back"><Icon name="arrow-left" size={18} /> Volver</a>
+      <a href="/portafolio/" class="btn btn-tonal">Ver Curriculum</a>
+    </div>
+  </header>
+  <main>
+    <Projects asPage />
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .bar { position: sticky; top: 0; z-index: 50; background: rgb(11 18 32 / 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .bar-inner { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; }
+  .back { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 500; }
+  .back:hover { color: var(--accent); }
+  .bar .btn { padding: 8px 16px; }
+</style>

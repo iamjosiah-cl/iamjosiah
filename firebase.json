@@ -1,1 +1,40 @@
-{"hosting":{"source":".","xignore":["firebase.json","**/.*","**/node_modules/**"],"frameworksBackend":{"region":"us-central1"},"redirects":[{"source":"https://iamjosiah.cl/**","destination":"https://www.iamjosiah.cl","type":301}]},"flutter":{"platforms":{"android":{"default":{"projectId":"iamjosiah-2b6be","appId":"1:243368828308:android:00c26f3c0e7763a7c28381","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"iamjosiah-2b6be","configurations":{"web":"1:243368828308:web:dc7192fd9806f3f7c28381","windows":"1:243368828308:web:6e73447f7975fdfbc28381"}}}}}}
+{
+  "hosting": {
+    "public": "site/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "trailingSlash": true,
+    "redirects": [
+      { "source": "https://iamjosiah.cl/**", "destination": "https://www.iamjosiah.cl", "type": 301 }
+    ],
+    "headers": [
+      {
+        "source": "/_astro/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "/flutter_service_worker.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "iamjosiah-2b6be",
+          "appId": "1:243368828308:android:00c26f3c0e7763a7c28381",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "iamjosiah-2b6be",
+          "configurations": {
+            "web": "1:243368828308:web:dc7192fd9806f3f7c28381",
+            "windows": "1:243368828308:web:6e73447f7975fdfbc28381"
+          }
+        }
+      }
+    }
+  }
+}

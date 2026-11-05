@@ -1,0 +1,106 @@
+---
+import Icon from './Icon.astro';
+import { technicalSkills, softSkills } from '../data/cv';
+---
+
+<section id="habilidades" class="section container">
+  <div class="section-head reveal">
+    <h2>Mis Habilidades</h2>
+    <div class="accent-bar"></div>
+    <p>Estas son las habilidades que he ido desarrollando a lo largo de mi formación académica y experiencia profesional.</p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Tipo de habilidades">
+    <button role="tab" id="tab-tech" aria-controls="panel-tech" aria-selected="true">Técnicas</button>
+    <button role="tab" id="tab-soft" aria-controls="panel-soft" aria-selected="false" tabindex="-1">Blandas</button>
+  </div>
+
+  <div id="panel-tech" role="tabpanel" aria-labelledby="tab-tech">
+    <ul class="grid">
+      {technicalSkills.map((g, i) => (
+        <li class="card card-hover group reveal" style={`--d:${(i % 3) * 50}ms`}>
+          <div class="group-head">
+            <span class="icon-box"><Icon name={g.icon} size={22} /></span>
+            <h3>{g.title}</h3>
+          </div>
+          <div class="chips">
+            {g.items.map((s) => (
+              <a class="chip" href={s.url} target="_blank" rel="noopener noreferrer" title={s.description}>{s.name}</a>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div id="panel-soft" role="tabpanel" aria-labelledby="tab-soft" hidden>
+    <ul class="grid">
+      {softSkills.map((s) => (
+        <li class="card card-hover soft">
+          <span class="icon-box soft-icon"><Icon name="check" size={20} /></span>
+          <div>
+            <h3>{s.name}</h3>
+            <p>{s.description}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('habilidades')!;
+  const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+  const select = (tab: HTMLButtonElement) => {
+    for (const t of tabs) {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+    }
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t));
+    t.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      select(next);
+      next.focus();
+    });
+  });
+</script>
+
+<style>
+  .tabs {
+    display: flex; justify-content: center; gap: 4px;
+    width: fit-content; margin: 0 auto 32px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.04);
+    border: 1px solid var(--border);
+  }
+  .tabs button {
+    padding: 8px 22px;
+    border: 0; border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600; font-size: 0.92rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .tabs button:hover { color: var(--text); }
+  .tabs button[aria-selected='true'] { background: var(--accent); color: var(--accent-ink); }
+
+  .grid {
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .group { padding: 22px; display: grid; gap: 18px; align-content: start; }
+  .group-head { display: flex; align-items: center; gap: 14px; }
+  h3 { font-size: 1.02rem; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .soft { padding: 20px; display: flex; gap: 14px; align-items: flex-start; }
+  .soft-icon { background: rgb(139 92 246 / 0.14); color: #a78bfa; width: 38px; height: 38px; }
+  .soft p { color: var(--text-muted); font-size: 0.92rem; margin-top: 4px; }
+</style>
