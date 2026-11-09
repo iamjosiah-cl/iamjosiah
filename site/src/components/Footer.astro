@@ -1,6 +1,5 @@
 ---
 import Icon from './Icon.astro';
-import { flutterAppUrl } from '../data/site';
 ---
 
 <footer class="footer">
@@ -10,11 +9,9 @@ import { flutterAppUrl } from '../data/site';
       <p>Ingeniero Civil en Informática apasionado por el desarrollo de software y la innovación tecnológica.</p>
     </div>
     <div class="right">
-      {flutterAppUrl && (
-        <a class="play" href={`${flutterAppUrl}/juegos`} target="_blank" rel="noopener noreferrer">
-          <Icon name="gamepad" size={16} /> ¿Aún quieres jugar? aquí estoy :)
-        </a>
-      )}
+      <a class="play" href="/juegos/">
+        <Icon name="gamepad" size={16} /> ¿Aún quieres jugar? aquí estoy :)
+      </a>
       <p class="copy">
         © {new Date().getFullYear()} Josías Jofré. Hecho con <Icon name="heart" size={14} class="heart" /> en Chile
       </p>

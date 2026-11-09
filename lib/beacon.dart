@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:portafolio/impresora/impresora.dart';
 import 'package:portafolio/portfolio_web/portafolio.dart';
 import 'package:portafolio/portfolio_web/proyectos.dart';
 import 'package:portafolio/jugar/dashboard_juegos.dart';

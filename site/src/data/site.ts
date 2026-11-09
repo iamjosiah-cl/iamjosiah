@@ -18,12 +18,6 @@ export const profile = {
   location: 'Chillán, Región de Ñuble, Chile',
 };
 
-/**
- * URL de la app Flutter que aún contiene los juegos (/juegos) y la impresora
- * (/print). Mientras sea null, los enlaces a esas secciones no se muestran.
- */
-export const flutterAppUrl: string | null = null;
-
 export type SocialIcon =
   | 'linkedin'
   | 'instagram'

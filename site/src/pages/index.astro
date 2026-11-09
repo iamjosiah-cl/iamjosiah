@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import avatar from '../assets/iamjosiahiconfondo.png';
-import { profile, socials, flutterAppUrl } from '../data/site';
+import { profile, socials } from '../data/site';
 
 interface LinkItem {
   title: string;
@@ -24,14 +24,12 @@ const groups: { title: string; links: LinkItem[] }[] = [
       { title: 'Descargar CV', subtitle: `Versión en PDF para impresión · Actualizado el ${profile.cvUpdated}`, href: profile.cvUrl, icon: 'download', color: '#10B981', download: true },
     ],
   },
-  ...(flutterAppUrl
-    ? [{
-        title: 'Zona de Juegos',
-        links: [
-          { title: 'Puzzles', subtitle: 'Ver todos los desafíos disponibles', href: `${flutterAppUrl}/juegos`, icon: 'gamepad', color: '#14B8A6', external: true },
-        ],
-      }]
-    : []),
+  {
+    title: 'Zona de Juegos',
+    links: [
+      { title: 'Puzzles', subtitle: 'Ver todos los desafíos disponibles', href: '/juegos/', icon: 'gamepad', color: '#14B8A6' },
+    ],
+  },
   {
     title: 'Mis Redes',
     links: [

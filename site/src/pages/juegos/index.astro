@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import Footer from '../../components/Footer.astro';
+import { games } from '../../data/games';
+---
+
+<Base title="Zona de Juegos | Josías Jofré" description="Puzzles de escape hechos por Josías Jofré para jugar en el navegador.">
+  <header class="bar">
+    <div class="container bar-inner">
+      <a href="/" class="back"><Icon name="arrow-left" size={18} /> Volver</a>
+    </div>
+  </header>
+
+  <main class="section container">
+    <div class="section-head reveal">
+      <h1>¡Bienvenido a la Zona de Juegos!</h1>
+      <div class="accent-bar"></div>
+      <p>Todos los juegos están desbloqueados para ti</p>
+    </div>
+
+    <h2 class="sub">Puzzles Disponibles 🧩</h2>
+    <p class="lead">Desafía tu mente con estos juegos</p>
+
+    <ul class="grid">
+      {games.map((game, i) => (
+        <li class="reveal" style={`--d:${i * 50}ms`}>
+          <a href={`/juegos/${game.slug}/`} class="card card-hover game">
+            <span class="art" style={`--c:${game.color}`} aria-hidden="true">{game.emoji}</span>
+            <span class="name">{game.title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .bar { position: sticky; top: 0; z-index: 50; background: rgb(11 18 32 / 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .bar-inner { height: var(--nav-h); display: flex; align-items: center; }
+  .back { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 500; }
+  .back:hover { color: var(--accent); }
+  h1 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem); font-weight: 800; }
+  .sub { font-size: 1.5rem; font-weight: 700; }
+  .lead { color: var(--text-muted); margin: 6px 0 24px; }
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); }
+  .game { display: block; overflow: hidden; height: 100%; }
+  .art { display: grid; place-items: center; height: 150px; font-size: 4rem; background: color-mix(in srgb, var(--c) 16%, transparent); }
+  .name { display: block; padding: 16px; font-weight: 700; text-align: center; }
+</style>

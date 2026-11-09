@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import { games, type GameInfo } from '../../data/games';
+import '../../styles/games.css';
+
+export const getStaticPaths = (() =>
+  games.map((game) => ({ params: { slug: game.slug }, props: { game } }))) satisfies GetStaticPaths;
+
+interface Props {
+  game: GameInfo;
+}
+const { game } = Astro.props;
+---
+
+<Base title={`${game.title} | Zona de Juegos`} description={`${game.title}: puzzle de escape hecho por Josías Jofré.`}>
+  <main id="game" data-slug={game.slug}>
+    <noscript><p style="padding: 24px">Este juego necesita JavaScript.</p></noscript>
+  </main>
+</Base>
+
+<script>
+  import { startGame } from '../../games/engine';
+  import { puzzles } from '../../games/puzzles';
+
+  const root = document.getElementById('game')!;
+  startGame(root, puzzles[root.dataset.slug!]());
+</script>

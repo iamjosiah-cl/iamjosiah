@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:portafolio/beacon.dart';
-import 'package:portafolio/impresora/impresora.dart';
 import 'package:portafolio/portfolio_web/portafolio.dart';
 import 'package:portafolio/jugar/dashboard_juegos.dart';
 import 'package:portafolio/styles/beacon_style.dart';
@@ -37,8 +36,6 @@ class MainApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => BeaconHome());
           case '/portafolio':
             return MaterialPageRoute(builder: (_) => const MyPortfolio());
-          case '/print':
-            return MaterialPageRoute(builder: (_) => const ChecklistPage());
           case '/juegos':
             return MaterialPageRoute(builder: (_) => const GamesPage());
           default:

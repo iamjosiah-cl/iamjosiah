@@ -5,7 +5,6 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import Footer from '../../components/Footer.astro';
 import { projects, type Project } from '../../data/projects';
-import { flutterAppUrl } from '../../data/site';
 
 export const getStaticPaths = (() =>
   projects.map((project) => ({ params: { slug: project.slug }, props: { project } }))) satisfies GetStaticPaths;
@@ -14,7 +13,6 @@ interface Props {
   project: Project;
 }
 const { project: p } = Astro.props;
-const appUrl = p.flutterPath && flutterAppUrl ? `${flutterAppUrl}${p.flutterPath}` : null;
 const others = projects.filter((x) => x.slug !== p.slug);
 ---
 
@@ -52,19 +50,12 @@ const others = projects.filter((x) => x.slug !== p.slug);
         )}
       </article>
 
-      {(appUrl || p.demoUrl) && (
+      {p.demoUrl && (
         <aside class="card block actions">
           <h2>Acciones</h2>
-          {appUrl && (
-            <a class="btn btn-primary" href={appUrl} target="_blank" rel="noopener noreferrer">
-              <Icon name="external" size={18} /> Probar aplicación
-            </a>
-          )}
-          {p.demoUrl && (
-            <a class={`btn ${appUrl ? 'btn-tonal' : 'btn-primary'}`} href={p.demoUrl} target="_blank" rel="noopener noreferrer">
-              <Icon name="globe" size={18} /> Ver demo online
-            </a>
-          )}
+          <a class="btn btn-primary" href={p.demoUrl} target="_blank" rel="noopener noreferrer">
+            <Icon name="globe" size={18} /> Ver demo online
+          </a>
         </aside>
       )}
     </div>

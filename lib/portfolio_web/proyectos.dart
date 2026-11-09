@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:portafolio/widgets/ui.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:portafolio/impresora/impresora.dart';
 import 'package:portafolio/styles/beacon_style.dart';
 import 'package:portafolio/widgets/animations.dart';
 
@@ -635,37 +634,6 @@ final List<Project> sampleProjects = [
     imageUrl: 'assets/vamos_tito_preview.png',
     repoUrl: 'https://github.com/tuUsuario/hidratacion-platform',
     demoUrl: 'https://gotita-a234d.web.app/',
-  ),
-  Project(
-    title: 'Impresora de tickets',
-    description: 'Sistema de gestión y emisión de tickets de 80mm con editor de texto enriquecido.',
-    longDescription:
-    'Desarrollo de una herramienta integral para la creación de tickets térmicos. Incluye un editor de texto avanzado que permite personalizar fuentes, estilos y alineación, además de generar vistas previas precisas de 80mm antes de la impresión.',
-    tags: ['Flutter', 'PDF Generation', 'Thermal Printing', 'UI Components'],
-    imageUrl:
-    'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?fit=crop&w=800&q=80',
-    internalAppBuilder: (context) => const ChecklistPage(),
-  ),
-  const Project(
-    title: 'Presupuesto Diario',
-    description:
-    'Aplicación de finanzas personales con sistema inteligente de rollover que recalcula tu presupuesto diario en tiempo real según tu comportamiento de gasto.',
-    longDescription:
-    'Full-Stack Flutter & Firebase Finance App que elimina la rigidez de los presupuestos mensuales tradicionales. '
-    'Implementa un algoritmo dinámico de arrastre de saldo (rollover): si ahorras hoy, el excedente se suma automáticamente a mañana; '
-    'si te excedes, el sistema ajusta tus días restantes para mantenerte dentro de tu meta. '
-    '\n\nCaracterísticas técnicas:\n'
-    '• Arquitectura limpia con gestión de estado avanzada usando Riverpod 3.0\n'
-    '• Sincronización en tiempo real con Cloud Firestore\n'
-    '• Autenticación segura con Firebase Auth (email, Google, Apple)\n'
-    '• Gestión de ciclos personalizados (quincenal, mensual, personalizado)\n'
-    '• Diseño premium Material 3 con soporte para temas e internacionalización\n'
-    '• Visualización intuitiva con cards informativas y indicadores de estado por color\n'
-    '\nNació de una necesidad real: optimizar el gasto diario sin perder de vista la meta mensual, '
-    'un problema común que resolví con lógica matemática aplicada al código.',
-    tags: ['Flutter', 'Firebase', 'Riverpod', 'Material 3', 'Firestore', 'Clean Architecture'],
-    imageUrl: 'assets/presupuesto_diario_preview.png',
-    demoUrl: 'https://rollback-deaa8.web.app/',
   ),
 ];
 
