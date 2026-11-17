@@ -1,0 +1,22 @@
+{
+  "name": "promo-acuario",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts AcuarioPromo out/mi-acuario-historia.mp4",
+    "still": "remotion still src/index.ts AcuarioPromo"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.544",
+    "@remotion/google-fonts": "^4.0.544",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.544"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}

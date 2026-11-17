@@ -9,6 +9,7 @@ Personal site "I Am Josiah" (iamjosiah.cl), hosted on Firebase Hosting (project 
 The repo holds **two apps**:
 - `site/`: the **Astro 5 + TypeScript** static site (landing `/`, `/portafolio/`, `/proyectos/`, `/proyectos/<slug>/`, `/juegos/`, `/juegos/<slug>/`, `/acuario/`, `/acuario/crear/`). This is what gets deployed.
 - The original Flutter app (`lib/`): **no longer deployed** and superseded by `site/`. The print tool and the Presupuesto Diario project were removed from both apps.
+- `promo/`: a small **Remotion** project that renders the Instagram-story promo video for Mi Acuario (`npm run render` → `promo/out/mi-acuario-historia.mp4`, 1080×1920; `npm run studio` to preview). It imports the sprites and scenery from `site/src/acuario/`, but fish movement there is a pure function of the frame number, because Remotion renders frames independently.
 
 ## Astro site (`site/`)
 
