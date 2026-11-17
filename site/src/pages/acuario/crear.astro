@@ -162,7 +162,7 @@ import { ACCESSORIES, COLORS, EYES, MESSAGES, PERSONALITIES, SPECIES } from '../
 </Base>
 
 <script>
-  import { localFishService as service, validate, cleanName, type NewFish } from '../../acuario/store';
+  import { fishService as service, validate, cleanName, type NewFish } from '../../acuario/store';
   import { animatePreview, fishFrames } from '../../acuario/sprites';
   import {
     ACCESSORIES, COLORS, EYES, MESSAGES, PERSONALITIES, SPECIES, labelOf, type FishDesign,
@@ -298,13 +298,21 @@ import { ACCESSORIES, COLORS, EYES, MESSAGES, PERSONALITIES, SPECIES } from '../
     );
     root.querySelectorAll('[data-prev]').forEach((b) => b.addEventListener('click', () => go(step - 1)));
 
-    form.addEventListener('submit', (e) => {
+    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (step !== 3) return;
+      // Enter en un campo de texto de los pasos 1 o 2 avanza en vez de no hacer nada.
+      if (step !== 3) return steps[step - 1].querySelector<HTMLElement>('[data-next]')!.click();
+      if (submitBtn.disabled) return;
       const accepted = form.querySelector<HTMLInputElement>('[name="accept"]')!.checked;
       if (!accepted) return showErrors({ accept: 'Debes aceptar las reglas para liberar a tu pez.' });
-      const result = service.publish(input());
+      showErrors({});
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Liberando…';
+      const result = await service.publish(input());
       if (!result.ok) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Liberar mi pez';
         showErrors({ ...result.errors, form: result.message });
         if (result.errors?.name || result.errors?.creatorName) go(2);
         return;

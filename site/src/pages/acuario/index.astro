@@ -69,7 +69,7 @@ import '../../styles/acuario.css';
         <li>Un pez por persona.</li>
         <li>Los peces que no respeten las reglas pueden ocultarse.</li>
       </ul>
-      <p class="aq-note">Versión de prueba: por ahora tu pez se guarda solo en este navegador. Pronto el acuario será compartido entre todos.</p>
+      <p class="aq-note">Solo guardamos los datos de tu pez: su nombre, tu apodo y su diseño. No pedimos correo ni datos personales.</p>
     </dialog>
 
     <!-- Celebración -->
@@ -88,7 +88,7 @@ import '../../styles/acuario.css';
 
 <script>
   import { AquariumEngine } from '../../acuario/engine';
-  import { localFishService as service, search } from '../../acuario/store';
+  import { fishService as service, search, toCode, PAGE_SIZE } from '../../acuario/store';
   import { animatePreview } from '../../acuario/sprites';
   import { MESSAGES, PERSONALITIES, SPECIES, labelOf, type Fish } from '../../acuario/catalog';
 
@@ -110,7 +110,10 @@ import '../../styles/acuario.css';
   // Cerrar diálogos con sus botones o tocando fuera.
   root.querySelectorAll('dialog').forEach((d) => {
     d.addEventListener('click', (e) => {
-      if (e.target === d || (e.target as HTMLElement).closest('[data-close]')) d.close();
+      // e.target === d también ocurre al tocar el relleno interior: se comprueba que el toque caiga fuera.
+      const r = d.getBoundingClientRect();
+      const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+      if ((e.target === d && outside) || (e.target as HTMLElement).closest('[data-close]')) d.close();
     });
   });
   fishDialog.addEventListener('close', () => {
@@ -164,10 +167,15 @@ import '../../styles/acuario.css';
     throw new Error('Canvas no disponible');
   }
 
-  function refresh() {
-    const fishes = service.list();
-    engine.setFishes(fishes);
-    count.textContent = `${fishes.length} peces`;
+  // Se parte con lo que hay en el navegador (peces de muestra y el propio) para pintar
+  // de inmediato; los de los demás visitantes se suman cuando responde Firestore.
+  let all = service.local();
+  let latest = ''; // fecha (ISO) del pez más nuevo recibido de Firestore
+  let more = false;
+  let loadFailed = false;
+
+  function render() {
+    count.textContent = `${all.length}${more ? '+' : ''} peces`;
     const mine = service.mine();
     const mineBtn = $<HTMLButtonElement>('[data-mine]');
     $('[data-create]').hidden = !!mine;
@@ -177,9 +185,53 @@ import '../../styles/acuario.css';
       mineBtn.onclick = () => engine.select(mine.id);
     }
   }
-  refresh();
+
+  /** Suma peces llegados de Firestore. Con `arriving` entran nadando en vez de aparecer. */
+  function add(list: Fish[], arriving = false) {
+    for (const f of list) if (f.createdAt > latest) latest = f.createdAt;
+    const known = new Set(all.map((f) => f.id));
+    const fresh = list.filter((f) => !known.has(f.id));
+    if (!fresh.length) return;
+    all = [...all, ...fresh];
+    if (arriving) fresh.forEach((f) => engine.addFish(f));
+    else engine.setFishes(all);
+    render();
+  }
+
+  engine.setFishes(all);
+  render();
   engine.start();
-  service.subscribe(refresh);
+
+  const loaded = service.load().then(
+    (remote) => {
+      more = remote.length >= PAGE_SIZE;
+      add(remote);
+    },
+    () => {
+      loadFailed = true;
+      status.textContent = 'No pudimos cargar los peces de otras personas. Revisa tu conexión.';
+    },
+  );
+
+  // Sincronización (RF-07): cada minuto se piden solo los peces más nuevos.
+  setInterval(() => {
+    if (document.hidden) return;
+    service.newer(latest || new Date(0).toISOString()).then(
+      (list) => {
+        if (loadFailed) status.textContent = '';
+        loadFailed = false;
+        add(list, true);
+      },
+      () => undefined,
+    );
+  }, 60_000);
+
+  void service.migrateLegacy().then((fish) => {
+    if (!fish) return;
+    all = [...all, fish];
+    engine.addFish(fish);
+    render();
+  });
 
   // Etiqueta con el nombre del pez marcado.
   const followTag = () => {
@@ -197,7 +249,7 @@ import '../../styles/acuario.css';
   const input = $<HTMLInputElement>('#aq-search-input');
   const results = $('.aq-results');
   function renderResults() {
-    const found = search(service.list(), input.value).slice(0, 30);
+    const found = search(all, input.value).slice(0, 30);
     results.replaceChildren(
       ...found.map((f) => {
         const li = document.createElement('li');
@@ -223,7 +275,22 @@ import '../../styles/acuario.css';
       results.append(li);
     }
   }
-  input.addEventListener('input', renderResults);
+  let lookup = 0;
+  input.addEventListener('input', () => {
+    renderResults();
+    // Un código completo que no está entre los peces cargados se consulta directo en Firestore.
+    const code = toCode(input.value);
+    const ticket = ++lookup;
+    if (code.length !== 6 || all.some((f) => f.id === code)) return;
+    service.get(code).then(
+      (fish) => {
+        if (!fish || ticket !== lookup) return;
+        add([fish]);
+        renderResults();
+      },
+      () => undefined,
+    );
+  });
 
   root.querySelectorAll<HTMLElement>('[data-open]').forEach((btn) =>
     btn.addEventListener('click', () => {
@@ -239,21 +306,36 @@ import '../../styles/acuario.css';
   // Enlaces: ?pez=CODIGO abre la ficha; ?nuevo=CODIGO celebra un pez recién liberado.
   const linked = params.get('pez');
   const fresh = params.get('nuevo');
-  if (fresh) {
-    history.replaceState(null, '', `/acuario/?pez=${encodeURIComponent(fresh)}`);
-    const fish = service.get(fresh);
-    if (fish) {
-      void engine.welcome(fish).then(() => {
-        $('[data-welcome-name]', welcomeDialog).textContent = fish.name;
-        $('[data-welcome-see]', welcomeDialog).onclick = () => {
-          welcomeDialog.close();
-          engine.select(fish.id);
-        };
-        welcomeDialog.showModal();
-      });
+  const mine = service.mine();
+  if (fresh && mine?.id === toCode(fresh)) {
+    history.replaceState(null, '', `/acuario/?pez=${mine.id}`);
+    void engine.welcome(mine).then(() => {
+      $('[data-welcome-name]', welcomeDialog).textContent = mine.name;
+      $('[data-welcome-see]', welcomeDialog).onclick = () => {
+        welcomeDialog.close();
+        engine.select(mine.id);
+      };
+      welcomeDialog.showModal();
+    });
+  } else if (linked ?? fresh) {
+    void openLinked(toCode((linked ?? fresh)!));
+  }
+
+  async function openLinked(code: string) {
+    let fish = all.find((f) => f.id === code);
+    if (!fish) {
+      await loaded;
+      fish = all.find((f) => f.id === code);
     }
-  } else if (linked) {
-    const fish = service.get(linked);
+    if (!fish) {
+      try {
+        fish = await service.get(code);
+      } catch {
+        status.textContent = 'No pudimos conectar con el acuario para buscar ese pez.';
+        return;
+      }
+      if (fish) add([fish]);
+    }
     if (fish) engine.select(fish.id);
     else status.textContent = 'Ese pez ya no está en el acuario o el enlace no es correcto.';
   }

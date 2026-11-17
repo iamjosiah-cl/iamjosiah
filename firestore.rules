@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Reglas de Firestore de iamjosiah.cl. Todo lo que no aparece aquí está denegado.
+// Para ocultar un pez: en la consola de Firebase, cambia su campo `status` a "hidden"
+// (o borra el documento). Desde la web nadie puede editar ni borrar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Nombre del pez o apodo: 2 a 20 caracteres, sin espacios en los extremos ni saltos
+    // de línea. La lista de palabras repite BLOCKED_ANYWHERE de site/src/acuario/store.ts.
+    function isName(v) {
+      return v is string
+        && v.size() >= 2 && v.size() <= 20
+        && v.matches('^\\S(.*\\S)?$')
+        && !v.lower().matches('.*(conchetumare|culiao|maricon|hitler|nigger|nigga|porno|xxx).*');
+    }
+
+    // Mi Acuario: solo se guardan los datos del pez; el dibujo se genera en el navegador.
+    // Los valores permitidos repiten el catálogo de site/src/acuario/catalog.ts.
+    match /fishes/{fishId} {
+      allow get: if resource.data.status == 'approved';
+      allow list: if resource.data.status == 'approved' && request.query.limit <= 150;
+
+      allow create: if fishId.matches('^[A-HJKMNP-Z2-9]{6}$')
+        && request.resource.data.keys().hasOnly(['name', 'creatorName', 'species', 'color', 'finColor',
+             'eyeStyle', 'accessory', 'personality', 'messageId', 'zoneId', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'creatorName', 'species', 'color', 'finColor',
+             'eyeStyle', 'accessory', 'personality', 'messageId', 'zoneId', 'status', 'createdAt'])
+        && isName(request.resource.data.name)
+        && isName(request.resource.data.creatorName)
+        && request.resource.data.species in ['round', 'long', 'puffer', 'angel']
+        && request.resource.data.color in ['orange', 'blue', 'pink', 'green', 'purple', 'yellow', 'red', 'white']
+        && request.resource.data.finColor in ['orange', 'blue', 'pink', 'green', 'purple', 'yellow', 'red', 'white']
+        && request.resource.data.eyeStyle in ['normal', 'happy', 'surprised', 'sleepy']
+        && request.resource.data.accessory in ['none', 'crown', 'bow', 'hat', 'glasses', 'flower']
+        && request.resource.data.personality in ['curious', 'shy', 'playful', 'sleepy', 'adventurous', 'hungry']
+        && request.resource.data.messageId in ['loves_exploring', 'looking_friends', 'bubble_king', 'nap_time', 'snack_time', 'hello_ocean']
+        && request.resource.data.zoneId == 'reef'
+        && request.resource.data.status == 'approved'
+        && request.resource.data.createdAt == request.time;
+
+      allow update, delete: if false;
+    }
+
+    // Formulario de contacto del portafolio: solo se puede escribir, nunca leer desde la web.
+    match /contact_messages/{messageId} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'message', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 120
+        && request.resource.data.email is string && request.resource.data.email.size() >= 3 && request.resource.data.email.size() <= 200
+        && request.resource.data.message is string && request.resource.data.message.size() >= 1 && request.resource.data.message.size() <= 5000
+        && request.resource.data.createdAt is string && request.resource.data.createdAt.size() <= 40;
+    }
+  }
+}

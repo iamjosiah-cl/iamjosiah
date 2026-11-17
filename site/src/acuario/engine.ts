@@ -35,7 +35,8 @@ export interface EngineOptions {
   onHover?: (fish: Fish | null) => void;
 }
 
-const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+const reducedMotion = () => motionQuery.matches;
 
 export class AquariumEngine {
   private ctx: CanvasRenderingContext2D;
@@ -151,6 +152,13 @@ export class AquariumEngine {
     while (this.swimmers.length < MAX_VISIBLE_FISH && rest.length) this.swimmers.push(this.spawn(rest.pop()!, 'inside'));
   }
 
+  /** Pez que llega mientras miras (lo publicó otra persona): entra nadando por un costado. */
+  addFish(fish: Fish) {
+    if (fish.status !== 'approved' || this.pool.some((f) => f.id === fish.id)) return;
+    this.pool.push(fish);
+    if (this.swimmers.length < MAX_VISIBLE_FISH) this.swimmers.push(this.spawn(fish, 'edge'));
+  }
+
   /** Pez recién liberado: entra por un costado, nada al centro y saluda. */
   welcome(fish: Fish): Promise<void> {
     if (!this.pool.some((f) => f.id === fish.id)) this.pool.push(fish);
@@ -160,8 +168,10 @@ export class AquariumEngine {
     const b = this.bounds();
     return new Promise((resolve) => {
       this.goTo(s, 'enter', (b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2);
-      s.speed = Math.max(s.speed, 45);
+      const cruise = s.speed;
+      s.speed = Math.max(cruise, 45); // llega rápido al centro y luego vuelve a su ritmo
       s.onArrive = () => {
+        s.speed = cruise;
         s.hop = 1;
         this.burst(s.x, s.y);
         this.mark(fish.id);
@@ -178,6 +188,10 @@ export class AquariumEngine {
     if (!s) {
       s = this.spawn(fish, 'edge');
       this.swimmers.push(s);
+    } else if (s.state === 'leave') {
+      // Iba saliendo por la rotación: se devuelve para que no desaparezca recién elegido.
+      const b = this.bounds();
+      this.goTo(s, 'enter', (b.minX + b.maxX) / 2, s.y);
     }
     s.hop = 1;
     this.mark(id);
@@ -269,7 +283,10 @@ export class AquariumEngine {
         const sp = s.speed * motion * arrive;
         s.vx += ((dx / (dist || 1)) * sp - s.vx) * Math.min(1, dt * 2.5);
         s.vy += ((dy / (dist || 1)) * sp * 0.6 - s.vy) * Math.min(1, dt * 2.5);
-        if (dist < 3 || s.timer <= 0) {
+        // El tiempo límite solo aplica dentro del acuario: un pez que entra o sale
+        // debe completar el trayecto, o aparecería de golpe en el borde.
+        const timedOut = s.timer <= 0 && s.state !== 'enter' && s.state !== 'leave';
+        if (dist < 3 || timedOut) {
           const cb = s.onArrive;
           s.onArrive = undefined;
           s.state = s.state === 'leave' ? 'leave' : 'idle';
