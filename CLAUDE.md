@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Personal site "I Am Josiah" (iamjosiah.cl), hosted on Firebase Hosting (project `iamjosiah-2b6be`). UI text and most code comments are in Spanish.
 
 The repo holds **two apps**:
-- `site/`: the **Astro 5 + TypeScript** static site (landing `/`, `/portafolio/`, `/proyectos/`, `/proyectos/<slug>/`, `/juegos/`, `/juegos/<slug>/`). This is what gets deployed.
+- `site/`: the **Astro 5 + TypeScript** static site (landing `/`, `/portafolio/`, `/proyectos/`, `/proyectos/<slug>/`, `/juegos/`, `/juegos/<slug>/`, `/acuario/`, `/acuario/crear/`). This is what gets deployed.
 - The original Flutter app (`lib/`): **no longer deployed** and superseded by `site/`. The print tool and the Presupuesto Diario project were removed from both apps.
 
 ## Astro site (`site/`)
@@ -30,6 +30,7 @@ firebase deploy --only hosting            # deploy (run `npm run build` in site/
 - Astro is pinned to v5 because the local Node is 22.13; Astro 7 needs Node ≥ 22.23.4.
 - All content (texts, links, CV data, projects) lives in `site/src/data/` (`site.ts`, `cv.ts`, `projects.ts`). Edit text there, not in components.
 - Games: `src/games/engine.ts` is a small DOM engine (scenes, transitions, native `<dialog>`s, top bar), `scenes.ts` has the shared door and keypad, and `puzzles.ts` defines the three puzzles and keeps their state in closures so it survives changing walls. The list shown on `/juegos/` is `src/data/games.ts`; a new puzzle needs an entry there and the same slug in `puzzles`. Styles are global in `src/styles/games.css` because the DOM is created at runtime.
+- Mi Acuario (`src/acuario/`, pages in `src/pages/acuario/`): community pixel-art aquarium built from a requirements doc (Sprints 1–3 done: aquarium, fish creator, fish card, search, welcome animation). No Firebase yet: `store.ts` implements a `FishService` on `localStorage` (one fish per browser, plus the demo fish in `demo.ts`); Sprint 4 should add a Firestore implementation of the same interface with server-side validation and keep `validate()` in sync. Fish sprites are generated in code from shapes + layers in `sprites.ts` (no image assets); the catalog in `catalog.ts` is the only source of allowed species/colors/eyes/accessories. `engine.ts` renders at a low logical resolution with an integer CSS scale (`image-rendering: pixelated`). Fish links are `/acuario/?pez=CODE` (static hosting, no per-fish pages). The Browser pane throttles `requestAnimationFrame` while hidden, so animation timing can't be checked there; step `update()` manually when debugging.
 - Styling: plain CSS with tokens in `site/src/styles/global.css` plus scoped `<style>` per component. No CSS framework. Icons are inline SVG in `site/src/components/Icon.astro`.
 - Interactivity is small vanilla TS in component `<script>` tags (nav menu, skills tabs, experience tabs, contact form). Entrance animation is the `.reveal` class + an IntersectionObserver in `layouts/Base.astro`; keep it short.
 - Gotchas: component CSS that sets `display` overrides the `hidden` attribute, which is why `global.css` forces `[hidden] { display: none !important }`. `:global(.class)` compounds on a scoped selector don't match reliably, so toggle state with data attributes (e.g. `.nav[data-open]`).

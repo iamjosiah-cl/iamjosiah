@@ -1,0 +1,380 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/acuario.css';
+import { ACCESSORIES, COLORS, EYES, MESSAGES, PERSONALITIES, SPECIES } from '../../acuario/catalog';
+---
+
+<Base title="Crea tu pez | Mi Acuario" description="Elige especie, colores, ojos y accesorio, ponle nombre a tu pez y libéralo en Mi Acuario.">
+  <Fragment slot="head">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap" />
+  </Fragment>
+
+  <div class="cr" data-creator>
+    <header class="cr-top">
+      <a href="/acuario/" class="cr-back">← Acuario</a>
+      <p class="cr-step" aria-live="polite">Paso <span data-step-n>1</span> de 3</p>
+    </header>
+
+    <div class="cr-preview-wrap">
+      <canvas class="aq-preview aq-stage-bg aq-pixelated" data-preview role="img" aria-label="Vista previa de tu pez"></canvas>
+      <p class="cr-preview-name" data-preview-name></p>
+    </div>
+
+    <section class="cr-done" hidden>
+      <h1>Ya tienes un pez</h1>
+      <p>Desde este navegador ya liberaste a <strong data-mine-name></strong>. Por ahora cada persona puede tener un pez.</p>
+      <a class="aq-btn aq-btn-primary aq-btn-big" data-mine-link href="/acuario/">Ir a verlo</a>
+    </section>
+
+    <form class="cr-form" novalidate>
+      <!-- Paso 1: apariencia -->
+      <section data-step="1">
+        <div class="cr-head">
+          <h1>Crea tu pez</h1>
+          <button type="button" class="aq-btn" data-random>🎲 Sorpréndeme</button>
+        </div>
+
+        <fieldset>
+          <legend>Especie</legend>
+          <div class="cr-options cr-species">
+            {SPECIES.map((s, i) => (
+              <label class="cr-opt">
+                <input type="radio" name="species" value={s.id} checked={i === 0} />
+                <canvas class="aq-pixelated" data-thumb={s.id} width="32" height="28" aria-hidden="true"></canvas>
+                <span>{s.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Color</legend>
+          <div class="cr-options">
+            {COLORS.map((c, i) => (
+              <label class="cr-swatch" title={c.label}>
+                <input type="radio" name="color" value={c.id} checked={i === 0} aria-label={c.label} />
+                <span style={`--c:${c.base}`}></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Aletas</legend>
+          <div class="cr-options">
+            {COLORS.map((c, i) => (
+              <label class="cr-swatch" title={c.label}>
+                <input type="radio" name="finColor" value={c.id} checked={i === 5} aria-label={c.label} />
+                <span style={`--c:${c.base}`}></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Ojos</legend>
+          <div class="cr-options">
+            {EYES.map((e, i) => (
+              <label class="cr-chip"><input type="radio" name="eyeStyle" value={e.id} checked={i === 0} /><span>{e.label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Accesorio</legend>
+          <div class="cr-options">
+            {ACCESSORIES.map((a, i) => (
+              <label class="cr-chip"><input type="radio" name="accessory" value={a.id} checked={i === 0} /><span>{a.label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="cr-nav">
+          <button type="button" class="aq-btn aq-btn-primary aq-btn-big" data-next>Siguiente</button>
+        </div>
+      </section>
+
+      <!-- Paso 2: identidad -->
+      <section data-step="2" hidden>
+        <h1>¿Quién es tu pez?</h1>
+
+        <div class="cr-field">
+          <label for="cr-name">Nombre del pez</label>
+          <input id="cr-name" name="name" class="aq-input" maxlength="20" autocomplete="off" placeholder="Ej: Burbujín" aria-describedby="cr-name-err" />
+          <p class="aq-field-error" id="cr-name-err" data-error="name"></p>
+        </div>
+
+        <div class="cr-field">
+          <label for="cr-creator">Tu apodo</label>
+          <input id="cr-creator" name="creatorName" class="aq-input" maxlength="20" autocomplete="nickname" placeholder="Ej: Pececito23" aria-describedby="cr-creator-err" />
+          <p class="cr-hint">No uses tu nombre real ni datos personales.</p>
+          <p class="aq-field-error" id="cr-creator-err" data-error="creatorName"></p>
+        </div>
+
+        <fieldset>
+          <legend>Personalidad</legend>
+          <div class="cr-options">
+            {PERSONALITIES.map((p, i) => (
+              <label class="cr-chip"><input type="radio" name="personality" value={p.id} checked={i === 0} /><span>{p.label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Mensaje</legend>
+          <div class="cr-options cr-messages">
+            {MESSAGES.map((m, i) => (
+              <label class="cr-chip"><input type="radio" name="messageId" value={m.id} checked={i === 0} /><span>«{m.label}»</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="cr-nav">
+          <button type="button" class="aq-btn" data-prev>Atrás</button>
+          <button type="button" class="aq-btn aq-btn-primary aq-btn-big" data-next>Siguiente</button>
+        </div>
+      </section>
+
+      <!-- Paso 3: revisión -->
+      <section data-step="3" hidden>
+        <h1>Revisa a tu pez</h1>
+        <dl class="cr-summary" data-summary></dl>
+
+        <div class="cr-rules">
+          <h2>Reglas de convivencia</h2>
+          <ul>
+            <li>Nombres amables: nada ofensivo, discriminatorio ni con datos personales.</li>
+            <li>Un pez por persona.</li>
+            <li>Los peces que no respeten las reglas pueden ocultarse.</li>
+          </ul>
+          <label class="cr-accept"><input type="checkbox" name="accept" /> Acepto las reglas de convivencia</label>
+          <p class="aq-field-error" data-error="accept"></p>
+        </div>
+
+        <p class="aq-field-error" data-error="form" role="alert"></p>
+        <div class="cr-nav">
+          <button type="button" class="aq-btn" data-prev>Atrás</button>
+          <button type="submit" class="aq-btn aq-btn-primary aq-btn-big">Liberar mi pez</button>
+        </div>
+      </section>
+    </form>
+  </div>
+</Base>
+
+<script>
+  import { localFishService as service, validate, cleanName, type NewFish } from '../../acuario/store';
+  import { animatePreview, fishFrames } from '../../acuario/sprites';
+  import {
+    ACCESSORIES, COLORS, EYES, MESSAGES, PERSONALITIES, SPECIES, labelOf, type FishDesign,
+  } from '../../acuario/catalog';
+
+  const root = document.querySelector<HTMLElement>('[data-creator]')!;
+  const form = root.querySelector<HTMLFormElement>('.cr-form')!;
+  const steps = [...root.querySelectorAll<HTMLElement>('[data-step]')];
+  const previewName = root.querySelector<HTMLElement>('[data-preview-name]')!;
+  let step = 1;
+
+  const value = (name: string) => (form.elements.namedItem(name) as RadioNodeList | HTMLInputElement).value;
+
+  function design(): FishDesign {
+    return {
+      species: value('species') as FishDesign['species'],
+      color: value('color') as FishDesign['color'],
+      finColor: value('finColor') as FishDesign['finColor'],
+      eyeStyle: value('eyeStyle') as FishDesign['eyeStyle'],
+      accessory: value('accessory') as FishDesign['accessory'],
+    };
+  }
+
+  function input(): NewFish {
+    return {
+      ...design(),
+      name: value('name'),
+      creatorName: value('creatorName'),
+      personality: value('personality') as NewFish['personality'],
+      messageId: value('messageId') as NewFish['messageId'],
+    };
+  }
+
+  // Pez ya creado desde este navegador (RN-01 / RF-13).
+  const mine = service.mine();
+  if (mine) {
+    form.hidden = true;
+    root.querySelector<HTMLElement>('.cr-step')!.hidden = true;
+    const done = root.querySelector<HTMLElement>('.cr-done')!;
+    done.hidden = false;
+    done.querySelector('[data-mine-name]')!.textContent = mine.name;
+    done.querySelector<HTMLAnchorElement>('[data-mine-link]')!.href = `/acuario/?pez=${mine.id}`;
+    animatePreview(root.querySelector('[data-preview]')!, () => mine);
+    previewName.textContent = mine.name;
+  } else {
+    let current = design();
+    animatePreview(root.querySelector('[data-preview]')!, () => current);
+
+    const paintThumbs = () => {
+      root.querySelectorAll<HTMLCanvasElement>('[data-thumb]').forEach((c) => {
+        const ctx = c.getContext('2d')!;
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.drawImage(fishFrames({ ...current, species: c.dataset.thumb as FishDesign['species'], accessory: 'none' })[0], 0, 0);
+      });
+    };
+    paintThumbs();
+
+    form.addEventListener('change', () => {
+      current = design();
+      paintThumbs();
+    });
+    form.addEventListener('input', () => {
+      previewName.textContent = cleanName(value('name'));
+    });
+
+    const pick = <T extends { id: string }>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)].id;
+    root.querySelector('[data-random]')!.addEventListener('click', () => {
+      const choice: Record<string, string> = {
+        species: pick(SPECIES), color: pick(COLORS), finColor: pick(COLORS), eyeStyle: pick(EYES), accessory: pick(ACCESSORIES),
+      };
+      for (const [name, id] of Object.entries(choice)) {
+        form.querySelector<HTMLInputElement>(`input[name="${name}"][value="${id}"]`)!.checked = true;
+      }
+      form.dispatchEvent(new Event('change'));
+    });
+
+    const showErrors = (errors: Record<string, string | undefined>) => {
+      form.querySelectorAll<HTMLElement>('[data-error]').forEach((el) => {
+        el.textContent = errors[el.dataset.error!] ?? '';
+      });
+      for (const name of ['name', 'creatorName']) {
+        form.querySelector(`[name="${name}"]`)!.setAttribute('aria-invalid', String(!!errors[name]));
+      }
+    };
+
+    const fillSummary = () => {
+      const d = input();
+      const rows: [string, string][] = [
+        ['Nombre', cleanName(d.name)],
+        ['Creador', cleanName(d.creatorName)],
+        ['Especie', labelOf(SPECIES, d.species)],
+        ['Colores', `${labelOf(COLORS, d.color)} con aletas ${labelOf(COLORS, d.finColor).toLowerCase()}`],
+        ['Ojos', labelOf(EYES, d.eyeStyle)],
+        ['Accesorio', labelOf(ACCESSORIES, d.accessory)],
+        ['Personalidad', labelOf(PERSONALITIES, d.personality)],
+        ['Mensaje', `«${labelOf(MESSAGES, d.messageId)}»`],
+      ];
+      root.querySelector('[data-summary]')!.replaceChildren(
+        ...rows.map(([k, v]) => {
+          const div = document.createElement('div');
+          const dt = document.createElement('dt');
+          const dd = document.createElement('dd');
+          dt.textContent = k;
+          dd.textContent = v;
+          div.append(dt, dd);
+          return div;
+        }),
+      );
+    };
+
+    const go = (n: number) => {
+      step = n;
+      steps.forEach((s) => (s.hidden = Number(s.dataset.step) !== n));
+      root.querySelector('[data-step-n]')!.textContent = String(n);
+      if (n === 3) fillSummary();
+      steps[n - 1].querySelector<HTMLElement>('h1')?.focus();
+      scrollTo({ top: 0 });
+    };
+    steps.forEach((s) => s.querySelector('h1')?.setAttribute('tabindex', '-1'));
+
+    root.querySelectorAll('[data-next]').forEach((b) =>
+      b.addEventListener('click', () => {
+        if (step === 2) {
+          const { name, creatorName } = validate(input());
+          showErrors({ name, creatorName });
+          if (name || creatorName) {
+            form.querySelector<HTMLInputElement>(name ? '[name="name"]' : '[name="creatorName"]')!.focus();
+            return;
+          }
+        }
+        go(step + 1);
+      }),
+    );
+    root.querySelectorAll('[data-prev]').forEach((b) => b.addEventListener('click', () => go(step - 1)));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (step !== 3) return;
+      const accepted = form.querySelector<HTMLInputElement>('[name="accept"]')!.checked;
+      if (!accepted) return showErrors({ accept: 'Debes aceptar las reglas para liberar a tu pez.' });
+      const result = service.publish(input());
+      if (!result.ok) {
+        showErrors({ ...result.errors, form: result.message });
+        if (result.errors?.name || result.errors?.creatorName) go(2);
+        return;
+      }
+      location.href = `/acuario/?nuevo=${result.fish.id}`;
+    });
+  }
+</script>
+
+<style is:global>
+  .cr { min-height: 100dvh; max-width: 560px; margin: 0 auto; padding: 0 16px 48px; color: var(--aq-text); }
+  body:has(.cr) { background: var(--aq-ink); }
+  body:has(.cr)::before { display: none; }
+  .cr h1 { font-family: var(--aq-pixel); font-size: 1.8rem; font-weight: 700; }
+  .cr h1:focus { outline: none; }
+  .cr-top { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .cr-back { color: var(--aq-muted); font-weight: 600; }
+  .cr-back:hover { color: var(--aq-text); }
+  .cr-step { font-family: var(--aq-pixel); color: var(--aq-sand); }
+
+  .cr-preview-wrap {
+    position: sticky; top: 0; z-index: 2;
+    padding: 8px 0 12px; background: var(--aq-ink);
+  }
+  .cr-preview-wrap .aq-preview { max-width: 200px; }
+  .cr-preview-name { min-height: 1.5em; margin-top: 6px; text-align: center; font-family: var(--aq-pixel); font-size: 1.2rem; color: var(--aq-sand); }
+
+  .cr-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+  .cr fieldset { margin: 18px 0 0; padding: 0; border: 0; }
+  .cr legend { margin-bottom: 8px; font-family: var(--aq-pixel); font-size: 1.15rem; color: var(--aq-muted); }
+  .cr-options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cr-options input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+  .cr-opt, .cr-chip {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    background: var(--aq-panel); border: 3px solid var(--aq-line); border-radius: 4px;
+  }
+  .cr-opt { flex-direction: column; flex: 1 1 calc(25% - 8px); min-width: 72px; padding: 8px 4px; font-size: 0.85rem; }
+  .cr-opt canvas { width: 64px; height: 56px; }
+  .cr-chip { min-height: 44px; padding: 6px 14px; font-weight: 600; }
+  .cr-messages .cr-chip { flex: 1 1 100%; }
+  .cr-opt:has(input:checked), .cr-chip:has(input:checked) { border-color: var(--aq-aqua); background: var(--aq-panel-2); box-shadow: 0 0 0 2px var(--aq-ink) inset; }
+  .cr-opt:has(input:focus-visible), .cr-chip:has(input:focus-visible), .cr-swatch:has(input:focus-visible) { outline: 3px solid var(--aq-sand); outline-offset: 2px; }
+
+  .cr-swatch { cursor: pointer; }
+  .cr-swatch span {
+    display: block; width: 44px; height: 44px;
+    background: var(--c); border: 3px solid var(--aq-ink); border-radius: 4px;
+    box-shadow: inset -4px -4px 0 rgb(0 0 0 / 0.2);
+  }
+  .cr-swatch:has(input:checked) span { outline: 3px solid var(--aq-aqua); outline-offset: 2px; }
+
+  .cr-field { margin-top: 18px; }
+  .cr-field label { display: block; margin-bottom: 6px; font-family: var(--aq-pixel); font-size: 1.15rem; color: var(--aq-muted); }
+  .cr-field .aq-input[aria-invalid='true'] { border-color: var(--aq-error); }
+  .cr-hint { margin-top: 6px; font-size: 0.85rem; color: var(--aq-muted); }
+  .aq-field-error:empty { display: none; }
+
+  .cr-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+  .cr-summary div { padding: 8px 10px; background: var(--aq-panel); border-radius: 4px; }
+  .cr-summary dt { font-size: 0.75rem; color: var(--aq-muted); }
+  .cr-summary dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .cr-rules { margin-top: 20px; padding: 14px; background: var(--aq-panel); border: 3px solid var(--aq-line); border-radius: 4px; }
+  .cr-rules h2 { font-family: var(--aq-pixel); font-size: 1.2rem; }
+  .cr-rules ul { margin: 8px 0 12px; padding-left: 20px; list-style: disc; color: var(--aq-muted); }
+  .cr-accept { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; }
+  .cr-accept input { width: 22px; height: 22px; accent-color: var(--aq-accent); }
+
+  .cr-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 28px; }
+  .cr-nav [data-next]:only-child { margin-left: auto; }
+  .cr-done { margin-top: 16px; text-align: center; }
+  .cr-done p { margin: 10px 0 20px; color: var(--aq-muted); }
+</style>

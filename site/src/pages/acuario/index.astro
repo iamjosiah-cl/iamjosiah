@@ -1,0 +1,328 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/acuario.css';
+---
+
+<Base title="Mi Acuario | I Am Josiah" description="Crea tu pez pixel art, ponle nombre y libéralo en el acuario de I Am Josiah.">
+  <Fragment slot="head">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&display=swap" />
+  </Fragment>
+
+  <div class="aq" data-aq>
+    <canvas class="aq-canvas aq-pixelated" role="img" aria-label="Acuario con peces nadando"></canvas>
+    <div class="aq-tag" hidden></div>
+
+    <header class="aq-top">
+      <a href="/" class="aq-back" aria-label="Volver a I Am Josiah">←</a>
+      <div class="aq-title">
+        <h1>🐠 Mi Acuario</h1>
+        <span class="aq-count" aria-live="polite"></span>
+      </div>
+      <button type="button" class="aq-btn" data-open="search" aria-label="Buscar pez">🔍<span>Buscar</span></button>
+      <button type="button" class="aq-btn" data-open="about" aria-label="Acerca de">?<span>Acerca de</span></button>
+    </header>
+
+    <div class="aq-bottom">
+      <a class="aq-btn aq-btn-primary aq-btn-big" href="/acuario/crear/" data-create>Crear mi pez</a>
+      <button type="button" class="aq-btn aq-btn-primary aq-btn-big" data-mine hidden></button>
+      <p class="aq-status" role="status"></p>
+    </div>
+
+    <!-- Ficha de un pez -->
+    <dialog class="aq-dialog" id="aq-fish" aria-labelledby="aq-fish-name">
+      <button type="button" class="aq-close" data-close aria-label="Cerrar">×</button>
+      <canvas class="aq-preview aq-stage-bg aq-pixelated" data-fish-preview aria-hidden="true"></canvas>
+      <p class="aq-fish-demo" hidden><span class="aq-badge">Pez de muestra</span></p>
+      <h2 id="aq-fish-name" data-fish-name></h2>
+      <p>de <strong data-fish-creator></strong></p>
+      <blockquote data-fish-message></blockquote>
+      <dl class="aq-facts">
+        <div><dt>Especie</dt><dd data-fish-species></dd></div>
+        <div><dt>Personalidad</dt><dd data-fish-personality></dd></div>
+        <div><dt>Llegó el</dt><dd data-fish-date></dd></div>
+        <div><dt>Código</dt><dd data-fish-code></dd></div>
+      </dl>
+      <div class="aq-dialog-actions">
+        <button type="button" class="aq-btn aq-btn-primary" data-share>Compartir</button>
+        <button type="button" class="aq-btn" data-close>Cerrar</button>
+      </div>
+      <p class="aq-share-msg" role="status"></p>
+    </dialog>
+
+    <!-- Buscar -->
+    <dialog class="aq-dialog" id="aq-search" aria-labelledby="aq-search-title">
+      <button type="button" class="aq-close" data-close aria-label="Cerrar">×</button>
+      <h2 id="aq-search-title">Buscar pez</h2>
+      <label class="aq-search-label" for="aq-search-input">Código, nombre o apodo del creador</label>
+      <input id="aq-search-input" class="aq-input" type="search" autocomplete="off" placeholder="Ej: BURBU1" />
+      <ul class="aq-results" aria-live="polite"></ul>
+    </dialog>
+
+    <!-- Acerca de -->
+    <dialog class="aq-dialog" id="aq-about" aria-labelledby="aq-about-title">
+      <button type="button" class="aq-close" data-close aria-label="Cerrar">×</button>
+      <h2 id="aq-about-title">Acerca de</h2>
+      <p>Mi Acuario es un pequeño océano comunitario: crea tu pez, ponle nombre y libéralo para que nade junto a los demás. Toca cualquier pez para conocerlo.</p>
+      <h3>Reglas de convivencia</h3>
+      <ul class="aq-rules">
+        <li>Nombres amables: nada ofensivo, discriminatorio ni con datos personales.</li>
+        <li>Un pez por persona.</li>
+        <li>Los peces que no respeten las reglas pueden ocultarse.</li>
+      </ul>
+      <p class="aq-note">Versión de prueba: por ahora tu pez se guarda solo en este navegador. Pronto el acuario será compartido entre todos.</p>
+    </dialog>
+
+    <!-- Celebración -->
+    <dialog class="aq-dialog aq-welcome" id="aq-welcome" aria-labelledby="aq-welcome-title">
+      <h2 id="aq-welcome-title">¡Bienvenido al océano!</h2>
+      <p class="aq-welcome-line"><strong data-welcome-name></strong> acaba de unirse al acuario.</p>
+      <p class="aq-welcome-deco" aria-hidden="true">🐠 · 🫧 · 🐟</p>
+      <p>Tu pez ya tiene un hogar. Ahora puedes visitarlo y compartirlo con tus amigos.</p>
+      <div class="aq-dialog-actions">
+        <button type="button" class="aq-btn aq-btn-primary" data-welcome-see>Ver mi pez</button>
+        <button type="button" class="aq-btn" data-close>Seguir mirando</button>
+      </div>
+    </dialog>
+  </div>
+</Base>
+
+<script>
+  import { AquariumEngine } from '../../acuario/engine';
+  import { localFishService as service, search } from '../../acuario/store';
+  import { animatePreview } from '../../acuario/sprites';
+  import { MESSAGES, PERSONALITIES, SPECIES, labelOf, type Fish } from '../../acuario/catalog';
+
+  const root = document.querySelector<HTMLElement>('[data-aq]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = root) => el.querySelector<T>(sel)!;
+  const canvas = $<HTMLCanvasElement>('.aq-canvas');
+  const header = $('.aq-top');
+  const tag = $('.aq-tag');
+  const count = $('.aq-count');
+  const status = $('.aq-status');
+  const fishDialog = $<HTMLDialogElement>('#aq-fish');
+  const searchDialog = $<HTMLDialogElement>('#aq-search');
+  const welcomeDialog = $<HTMLDialogElement>('#aq-welcome');
+  const params = new URLSearchParams(location.search);
+
+  let stopPreview: (() => void) | null = null;
+  let current: Fish | null = null;
+
+  // Cerrar diálogos con sus botones o tocando fuera.
+  root.querySelectorAll('dialog').forEach((d) => {
+    d.addEventListener('click', (e) => {
+      if (e.target === d || (e.target as HTMLElement).closest('[data-close]')) d.close();
+    });
+  });
+  fishDialog.addEventListener('close', () => {
+    stopPreview?.();
+    stopPreview = null;
+  });
+
+  const shareUrl = (fish: Fish) => `${location.origin}/acuario/?pez=${fish.id}`;
+
+  function openFish(fish: Fish) {
+    current = fish;
+    $('[data-fish-name]', fishDialog).textContent = fish.name;
+    $('[data-fish-creator]', fishDialog).textContent = fish.creatorName;
+    $('[data-fish-message]', fishDialog).textContent = `«${labelOf(MESSAGES, fish.messageId)}»`;
+    $('[data-fish-species]', fishDialog).textContent = labelOf(SPECIES, fish.species);
+    $('[data-fish-personality]', fishDialog).textContent = labelOf(PERSONALITIES, fish.personality);
+    $('[data-fish-date]', fishDialog).textContent = new Date(fish.createdAt).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+    $('[data-fish-code]', fishDialog).textContent = fish.id;
+    $('.aq-fish-demo', fishDialog).hidden = !fish.demo;
+    $('.aq-share-msg', fishDialog).textContent = '';
+    stopPreview?.();
+    stopPreview = animatePreview($<HTMLCanvasElement>('[data-fish-preview]', fishDialog), () => fish);
+    if (!fishDialog.open) fishDialog.showModal();
+  }
+
+  $('[data-share]', fishDialog).addEventListener('click', async () => {
+    if (!current) return;
+    const url = shareUrl(current);
+    const msg = $('.aq-share-msg', fishDialog);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${current.name} en Mi Acuario`, text: `¡Conoce a ${current.name} en Mi Acuario!`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      msg.textContent = 'Enlace copiado.';
+    } catch (err) {
+      if ((err as DOMException).name !== 'AbortError') msg.textContent = `Copia este enlace: ${url}`;
+    }
+  });
+
+  let engine: AquariumEngine;
+  try {
+    engine = new AquariumEngine(canvas, {
+      topInset: () => header.offsetHeight,
+      onSelect: openFish,
+      onHover: (fish) => fish && engine.mark(fish.id),
+    });
+  } catch {
+    status.textContent = 'Tu navegador no pudo dibujar el acuario. Prueba con otro navegador.';
+    throw new Error('Canvas no disponible');
+  }
+
+  function refresh() {
+    const fishes = service.list();
+    engine.setFishes(fishes);
+    count.textContent = `${fishes.length} peces`;
+    const mine = service.mine();
+    const mineBtn = $<HTMLButtonElement>('[data-mine]');
+    $('[data-create]').hidden = !!mine;
+    mineBtn.hidden = !mine;
+    if (mine) {
+      mineBtn.textContent = `Ver a ${mine.name}`;
+      mineBtn.onclick = () => engine.select(mine.id);
+    }
+  }
+  refresh();
+  engine.start();
+  service.subscribe(refresh);
+
+  // Etiqueta con el nombre del pez marcado.
+  const followTag = () => {
+    const pos = engine.markedPosition();
+    tag.hidden = !pos;
+    if (pos) {
+      if (tag.textContent !== pos.name) tag.textContent = pos.name;
+      tag.style.transform = `translate(${Math.round(pos.x)}px, ${Math.round(pos.y)}px) translate(-50%, -100%)`;
+    }
+    requestAnimationFrame(followTag);
+  };
+  requestAnimationFrame(followTag);
+
+  // Buscar.
+  const input = $<HTMLInputElement>('#aq-search-input');
+  const results = $('.aq-results');
+  function renderResults() {
+    const found = search(service.list(), input.value).slice(0, 30);
+    results.replaceChildren(
+      ...found.map((f) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'aq-result';
+        btn.innerHTML = '<strong></strong><span></span><code></code>';
+        btn.querySelector('strong')!.textContent = f.name;
+        btn.querySelector('span')!.textContent = `de ${f.creatorName}`;
+        btn.querySelector('code')!.textContent = f.id;
+        btn.addEventListener('click', () => {
+          searchDialog.close();
+          engine.select(f.id);
+        });
+        li.append(btn);
+        return li;
+      }),
+    );
+    if (!found.length) {
+      const li = document.createElement('li');
+      li.className = 'aq-empty';
+      li.textContent = 'No encontramos peces con esa búsqueda.';
+      results.append(li);
+    }
+  }
+  input.addEventListener('input', renderResults);
+
+  root.querySelectorAll<HTMLElement>('[data-open]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const d = $<HTMLDialogElement>(`#aq-${btn.dataset.open}`);
+      if (d === searchDialog) {
+        input.value = '';
+        renderResults();
+      }
+      d.showModal();
+    }),
+  );
+
+  // Enlaces: ?pez=CODIGO abre la ficha; ?nuevo=CODIGO celebra un pez recién liberado.
+  const linked = params.get('pez');
+  const fresh = params.get('nuevo');
+  if (fresh) {
+    history.replaceState(null, '', `/acuario/?pez=${encodeURIComponent(fresh)}`);
+    const fish = service.get(fresh);
+    if (fish) {
+      void engine.welcome(fish).then(() => {
+        $('[data-welcome-name]', welcomeDialog).textContent = fish.name;
+        $('[data-welcome-see]', welcomeDialog).onclick = () => {
+          welcomeDialog.close();
+          engine.select(fish.id);
+        };
+        welcomeDialog.showModal();
+      });
+    }
+  } else if (linked) {
+    const fish = service.get(linked);
+    if (fish) engine.select(fish.id);
+    else status.textContent = 'Ese pez ya no está en el acuario o el enlace no es correcto.';
+  }
+</script>
+
+<style is:global>
+  .aq { position: fixed; inset: 0; overflow: hidden; background: #0a3052; color: var(--aq-text); }
+  .aq-canvas { position: absolute; top: 0; left: 0; display: block; touch-action: manipulation; }
+
+  .aq-top {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px 18px;
+    background: linear-gradient(rgb(7 26 46 / 0.85), rgb(7 26 46 / 0));
+  }
+  .aq-back { display: grid; place-items: center; width: 40px; height: 40px; font-size: 1.4rem; color: var(--aq-text); }
+  .aq-title { flex: 1; min-width: 0; }
+  .aq-title h1 { font-family: var(--aq-pixel); font-size: clamp(1.2rem, 4vw, 1.7rem); font-weight: 700; line-height: 1.1; text-shadow: 0 3px 0 var(--aq-ink); white-space: nowrap; }
+  .aq-count { font-size: 0.8rem; color: var(--aq-muted); }
+  .aq-top .aq-btn { min-height: 40px; padding: 4px 12px; }
+  @media (max-width: 560px) { .aq-top .aq-btn span { display: none; } .aq-top .aq-btn { width: 44px; padding: 0; } }
+
+  .aq-bottom {
+    position: absolute; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 10px; padding-inline: 16px; pointer-events: none;
+  }
+  .aq-bottom > * { pointer-events: auto; }
+  .aq-bottom .aq-status:empty { display: none; }
+  .aq-bottom .aq-status { padding: 6px 12px; text-align: center; background: rgb(7 26 46 / 0.85); border-radius: 4px; }
+
+  .aq-tag {
+    position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;
+    padding: 2px 8px; white-space: nowrap;
+    font-family: var(--aq-pixel); font-size: 0.95rem; color: var(--aq-ink);
+    background: #fff6a8; border: 2px solid var(--aq-ink); border-radius: 3px;
+  }
+
+  .aq-dialog blockquote { margin: 12px 0 0; font-family: var(--aq-pixel); font-size: 1.15rem; color: var(--aq-sand); }
+  .aq-dialog h3 { font-family: var(--aq-pixel); font-size: 1.15rem; margin: 18px 0 6px; }
+  .aq-fish-demo { margin: 10px 0 4px; }
+  .aq-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 0; }
+  .aq-facts div { padding: 8px 10px; background: var(--aq-panel-2); border-radius: 4px; }
+  .aq-facts dt { font-size: 0.75rem; color: var(--aq-muted); }
+  .aq-facts dd { margin: 0; font-weight: 600; }
+  .aq-share-msg { margin-top: 10px; font-size: 0.9rem; word-break: break-all; }
+  .aq-share-msg:empty { display: none; }
+  .aq-rules { padding-left: 20px; list-style: disc; color: var(--aq-muted); }
+  .aq-note { margin-top: 14px; padding: 10px; font-size: 0.9rem; background: var(--aq-panel-2); border-radius: 4px; }
+
+  .aq-search-label { display: block; margin: 12px 0 6px; font-size: 0.9rem; color: var(--aq-muted); }
+  .aq-input {
+    width: 100%; min-height: 44px; padding: 8px 12px;
+    font: inherit; color: var(--aq-text); background: var(--aq-ink);
+    border: 3px solid var(--aq-line); border-radius: 4px;
+  }
+  .aq-input:focus { outline: none; border-color: var(--aq-aqua); }
+  .aq-results { display: grid; gap: 6px; margin-top: 12px; max-height: 50dvh; overflow: auto; }
+  .aq-result {
+    display: grid; grid-template-columns: 1fr auto; gap: 0 10px; width: 100%; padding: 8px 12px;
+    text-align: left; font: inherit; color: var(--aq-text); background: var(--aq-panel-2);
+    border: 2px solid transparent; border-radius: 4px; cursor: pointer;
+  }
+  .aq-result:hover, .aq-result:focus-visible { border-color: var(--aq-aqua); }
+  .aq-result span { grid-column: 1; font-size: 0.85rem; color: var(--aq-muted); }
+  .aq-result code { grid-row: 1 / 3; grid-column: 2; align-self: center; font-size: 0.85rem; color: var(--aq-sand); }
+  .aq-empty { color: var(--aq-muted); padding: 8px 0; }
+
+  .aq-welcome { text-align: center; }
+  .aq-welcome h2 { font-size: 2rem; color: var(--aq-sand); }
+  .aq-welcome-line { margin-top: 10px; font-size: 1.1rem; color: var(--aq-text) !important; }
+  .aq-welcome-deco { font-size: 1.6rem; margin: 10px 0; }
+</style>

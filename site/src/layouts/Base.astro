@@ -47,6 +47,8 @@ const ogImage = new URL('/icons/Icon-512.png', Astro.site).toString();
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
     />
 
+    <slot name="head" />
+
     <!-- Marca que hay JS antes de pintar: las animaciones de entrada solo
          ocultan contenido cuando existe el script que lo vuelve a mostrar. -->
     <script is:inline>document.documentElement.classList.add('js');</script>

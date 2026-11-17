@@ -1,0 +1,59 @@
+/* Mi Acuario: estilos compartidos por el acuario y el creador. */
+:root {
+  --aq-ink: #071a2e;
+  --aq-panel: #0d2a45;
+  --aq-panel-2: #123a5c;
+  --aq-line: #2b5c85;
+  --aq-text: #eaf6ff;
+  --aq-muted: #9cc3e0;
+  --aq-accent: #ff8a5c;
+  --aq-accent-dark: #8a2f12;
+  --aq-aqua: #5fe3d0;
+  --aq-sand: #f3d79a;
+  --aq-error: #ffb0a0;
+  --aq-pixel: 'Pixelify Sans', ui-monospace, monospace;
+}
+
+.aq-pixelated { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* Botones pixel */
+.aq-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 8px 16px;
+  font-family: var(--aq-pixel); font-size: 1.05rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--aq-text); background: var(--aq-panel-2);
+  border: 3px solid var(--aq-ink); border-radius: 4px;
+  box-shadow: inset -3px -3px 0 rgb(0 0 0 / 0.25), inset 3px 3px 0 rgb(255 255 255 / 0.12), 0 4px 0 var(--aq-ink);
+  cursor: pointer; text-decoration: none;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.aq-btn:hover { filter: brightness(1.12); }
+.aq-btn:active { transform: translateY(3px); box-shadow: inset -3px -3px 0 rgb(0 0 0 / 0.25), 0 1px 0 var(--aq-ink); }
+.aq-btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.aq-btn-primary { color: #2b0e04; background: var(--aq-accent); border-color: var(--aq-accent-dark); box-shadow: inset -3px -3px 0 rgb(0 0 0 / 0.18), inset 3px 3px 0 rgb(255 255 255 / 0.3), 0 4px 0 var(--aq-accent-dark); }
+.aq-btn-big { min-height: 56px; padding: 10px 28px; font-size: 1.3rem; }
+.aq-btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+
+/* Diálogos */
+.aq-dialog {
+  width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px);
+  padding: 20px; overflow: auto;
+  color: var(--aq-text); background: var(--aq-panel);
+  border: 4px solid var(--aq-line); border-radius: 6px;
+  box-shadow: 0 0 0 4px var(--aq-ink), 0 18px 40px rgb(0 0 0 / 0.5);
+}
+.aq-dialog::backdrop { background: rgb(4 14 26 / 0.6); }
+.aq-dialog h2 { font-family: var(--aq-pixel); font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+.aq-dialog p { color: var(--aq-muted); }
+.aq-close { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; background: none; color: var(--aq-muted); font-size: 1.5rem; cursor: pointer; }
+.aq-close:hover { color: var(--aq-text); }
+.aq-dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.aq-dialog-actions .aq-btn { flex: 1 1 auto; }
+
+.aq-preview { display: block; width: 100%; max-width: 256px; aspect-ratio: 32 / 30; margin: 0 auto; }
+.aq-stage-bg { background: radial-gradient(circle at 50% 40%, #1f78a8, #0d3d64 70%); border: 3px solid var(--aq-ink); border-radius: 4px; }
+
+.aq-badge { display: inline-block; padding: 2px 8px; font-size: 0.75rem; font-weight: 600; color: var(--aq-ink); background: var(--aq-aqua); border-radius: 3px; }
+
+.aq-field-error { color: var(--aq-error); font-size: 0.88rem; margin-top: 6px; }
+.aq-status { color: var(--aq-error); }
